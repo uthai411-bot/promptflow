@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>PromptFlow</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+:root{--bg:#0f172a;--bg2:#1e293b;--bg3:#0f172a;--card:#1e293b;--border:#334155;--text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;--ind:#818cf8}
+@media(prefers-color-scheme:light){:root{--bg:#f8fafc;--bg2:#fff;--bg3:#f1f5f9;--card:#fff;--border:#e2e8f0;--text:#0f172a;--text2:#475569;--text3:#94a3b8}}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Plus Jakarta Sans','Noto Sans Thai',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+.hdr{background:linear-gradient(135deg,#1e1b4b,#312e81,#1e3a5f);padding:12px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.logo{width:32px;height:32px;background:linear-gradient(135deg,#818cf8,#38bdf8);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.brand{font-size:15px;font-weight:700;color:#fff}.brand-sub{font-size:9px;color:#a5b4fc}
+.hdr-r{margin-left:auto}.lsw{position:relative}
+.lsw select{appearance:none;background:rgba(255,255,255,.12);border:.5px solid rgba(129,140,248,.4);color:#e0e7ff;font-size:11px;font-weight:600;font-family:inherit;padding:5px 20px 5px 8px;border-radius:7px;cursor:pointer;outline:none}
+.lsw::after{content:'▾';position:absolute;right:6px;top:50%;transform:translateY(-50%);color:#a5b4fc;font-size:10px;pointer-events:none}
+.car-row{padding:8px 12px 9px;background:var(--bg3);flex-shrink:0;border-bottom:1px solid var(--border)}
+.car-wrap{position:relative}
+.car-wrap select{width:100%;appearance:none;background:var(--bg2);border:.5px solid var(--border);color:var(--text);font-size:13px;font-weight:600;font-family:inherit;padding:9px 30px 9px 12px;border-radius:9px;cursor:pointer;outline:none}
+.car-wrap select:focus{border-color:var(--ind)}
+.car-wrap::after{content:'▾';position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none}
+.badge{display:inline-flex;align-items:center;gap:4px;margin-top:5px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600}
+.lvl-row{display:flex;background:var(--bg3);padding:8px 12px 0;gap:8px;flex-shrink:0}
+.lvl-btn{flex:1;padding:9px 4px 7px;font-size:10px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--bg2);color:var(--text3);font-family:inherit;transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:2px;border-radius:10px}
+.lvl-icon{font-size:17px;line-height:1}.lvl-name{font-size:10px;font-weight:700}
+.lvl-desc{font-size:9px;font-weight:400;color:var(--text3);text-align:center;line-height:1.3}
+.lvl-btn.ag{background:rgba(16,185,129,.08);border-color:#10b981;color:#059669}.lvl-btn.ag .lvl-desc{color:#34d399}
+.lvl-btn.am{background:rgba(99,102,241,.08);border-color:#6366f1;color:#4f46e5}.lvl-btn.am .lvl-desc{color:#818cf8}
+.lvl-btn.ae{background:rgba(245,158,11,.08);border-color:#f59e0b;color:#d97706}.lvl-btn.ae .lvl-desc{color:#fbbf24}
+.hint-row{padding:5px 12px 2px;background:var(--bg3);flex-shrink:0}
+.hint-box{border-radius:8px;padding:6px 10px;font-size:10.5px;font-weight:500;line-height:1.4}
+.gh{background:rgba(16,185,129,.08);color:#34d399;border:.5px solid rgba(16,185,129,.2)}
+.mh{background:rgba(99,102,241,.08);color:#818cf8;border:.5px solid rgba(99,102,241,.2)}
+.eh{background:rgba(245,158,11,.08);color:#fbbf24;border:.5px solid rgba(245,158,11,.2)}
+.tabs{display:flex;background:var(--bg3);flex-shrink:0;border-bottom:1px solid var(--border);margin-top:6px}
+.tab{flex:1;padding:8px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text3);font-family:inherit;border-bottom:2px solid transparent;transition:all .15s}
+.tab.on{color:var(--ind);border-bottom-color:var(--ind);background:rgba(129,140,248,.05)}
+.pane{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 10px 20px;background:var(--bg3)}
+.pane.off{display:none}
+.sdiv{display:flex;align-items:center;gap:8px;margin:14px 0 8px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text3)}
+.sdiv::before,.sdiv::after{content:'';flex:1;height:.5px;background:var(--border)}
+.sbadge{padding:2px 8px;border-radius:4px;font-size:9px;font-weight:700}
+.card{background:var(--card);border-radius:12px;border:.5px solid var(--border);padding:11px 13px;margin-bottom:9px}
+.ch{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.ci{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px}
+.cl{font-size:12px;font-weight:600;color:var(--text)}
+.tip{font-size:11px;color:var(--text3);margin-bottom:6px;padding:5px 8px;background:rgba(129,140,248,.07);border-left:2px solid var(--ind);border-radius:0 4px 4px 0;line-height:1.5}
+.inp{width:100%;background:var(--bg2);border:.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);font-family:inherit;resize:none;-webkit-appearance:none}
+.inp:focus{outline:none;border-color:var(--ind);box-shadow:0 0 0 3px rgba(129,140,248,.1)}
+.inp::placeholder{color:var(--text3);font-size:12px}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:3px}
+.chip{padding:5px 11px;border-radius:20px;font-size:11px;cursor:pointer;border:.5px solid var(--border);background:var(--bg2);color:var(--text2);font-family:inherit;font-weight:500;transition:all .15s}
+.chip.on{background:rgba(129,140,248,.15);border-color:var(--ind);color:var(--ind)}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 20px;gap:10px;opacity:.4;text-align:center}
+.empty p{font-size:13px;color:var(--text2);line-height:1.6}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
+.stat{background:var(--card);border-radius:7px;padding:7px 9px;border:.5px solid var(--border)}
+.sv{font-size:17px;font-weight:700}.sl{font-size:10px;color:var(--text3);margin-top:1px}
+.psec{margin-bottom:10px}
+.plbl{display:inline-flex;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:4px;margin-bottom:4px}
+.c0{background:rgba(129,140,248,.12);color:#818cf8}.c1{background:rgba(16,185,129,.12);color:#059669}
+.c2{background:rgba(245,158,11,.12);color:#d97706}.c3{background:rgba(236,72,153,.12);color:#db2777}
+.c4{background:rgba(99,102,241,.12);color:#4f46e5}.c5{background:rgba(239,68,68,.12);color:#dc2626}
+.c6{background:rgba(20,184,166,.12);color:#0f766e}.c7{background:rgba(139,92,246,.12);color:#7c3aed}
+.c8{background:rgba(249,115,22,.12);color:#c2410c}.c9{background:rgba(14,165,233,.12);color:#0369a1}
+.cz{background:rgba(100,116,139,.12);color:#475569}
+.pbody{font-size:12px;color:var(--text);line-height:1.7;padding-left:2px}
+.pstep{display:flex;gap:7px;margin-bottom:3px}
+.sn{min-width:18px;height:18px;border-radius:50%;background:rgba(20,184,166,.12);color:#0f766e;font-size:9px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.pdiv{border:none;border-top:.5px dashed var(--border);margin:8px 0}
+.pclo{background:rgba(129,140,248,.06);border:.5px solid rgba(129,140,248,.2);border-radius:7px;padding:8px 10px;font-size:11px;color:var(--text2);line-height:1.6}
+.acts{display:flex;gap:7px;margin-top:4px}
+.btn{display:flex;align-items:center;justify-content:center;gap:5px;padding:11px 14px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s}
+.btnp{background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;flex:1}
+.btnp:active{opacity:.85;transform:scale(.98)}
+.btng{background:var(--card);border:.5px solid var(--border);color:var(--text2);padding:11px;min-width:44px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;padding:9px 18px;border-radius:9px;font-size:12px;font-weight:600;pointer-events:none;opacity:0;transition:opacity .2s;z-index:99;white-space:nowrap}
+.toast.on{opacity:1}
+.cur{display:inline-block;width:2px;height:12px;background:var(--ind);animation:blink 1s infinite;vertical-align:middle;border-radius:1px;margin-left:2px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="logo"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+  <div><div class="brand">PromptFlow</div><div class="brand-sub">Simple Input · Expert Prompt</div></div>
+  <div class="hdr-r"><div class="lsw">
+    <select id="lsel" onchange="changeLang(this.value)">
+      <option value="en">🇬🇧 EN</option><option value="th">🇹🇭 TH</option>
+    </select>
+  </div></div>
+</div>
+<div class="car-row">
+  <div class="car-wrap"><select id="csel" onchange="setCar(this.value)"></select></div>
+  <div id="cbadge"></div>
+</div>
+<div class="lvl-row">
+  <button class="lvl-btn ag" id="bg" onclick="setLevel('g')">
+    <span class="lvl-icon">🙋</span><span class="lvl-name" id="lg">General</span>
+    <span class="lvl-desc" id="lgd">Everyday tasks</span>
+  </button>
+  <button class="lvl-btn" id="bm" onclick="setLevel('m')">
+    <span class="lvl-icon">📊</span><span class="lvl-name" id="lm">Manager</span>
+    <span class="lvl-desc" id="lmd">Team decisions</span>
+  </button>
+  <button class="lvl-btn" id="be" onclick="setLevel('e')">
+    <span class="lvl-icon">🏆</span><span class="lvl-name" id="le">Executive</span>
+    <span class="lvl-desc" id="led">Board strategy</span>
+  </button>
+</div>
+<div class="hint-row"><div class="hint-box gh" id="hbox"></div></div>
+<div class="tabs">
+  <button class="tab on" id="ti" onclick="switchTab('i')">✏️ <span id="tli">Input</span></button>
+  <button class="tab" id="tp" onclick="switchTab('p')">👁 <span id="tlp">Preview</span></button>
+</div>
+<div class="pane" id="pi"><div id="fc"></div></div>
+<div class="pane off" id="pp">
+  <div class="stats">
+    <div class="stat"><div class="sv" id="sc">0</div><div class="sl" id="slc">Chars</div></div>
+    <div class="stat"><div class="sv" id="st">0</div><div class="sl">~Tokens</div></div>
+    <div class="stat"><div class="sv" id="ss">0</div><div class="sl" id="sls">Sections</div></div>
+  </div>
+  <div class="empty" id="pe"><p id="pet">Fill in fields to see your Prompt</p></div>
+  <div id="pc" style="display:none"></div>
+  <div style="height:8px"></div>
+  <div class="acts">
+    <button class="btn btng" onclick="clearAll()">🗑</button>
+    <button class="btn btnp" id="cpbtn" onclick="copyPrompt()">📋 <span id="cpl">Copy Prompt</span></button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+// ── CONSTANTS ──────────────────────────────────────────────────────────────
+var CARS=['content','review','caption','lawyer','engineer','cfo','marketing','sales','hr','ta','teacher','influencer'];
+var EMO={content:'✍️',review:'⭐',caption:'📸',lawyer:'⚖️',engineer:'🔧',cfo:'💰',marketing:'📣',sales:'🎯',hr:'👥',ta:'🔍',teacher:'🎓',influencer:'🌟'};
+var COL={content:'#818cf8',review:'#f59e0b',caption:'#ec4899',lawyer:'#94a3b8',engineer:'#38bdf8',cfo:'#10b981',marketing:'#f97316',sales:'#ef4444',hr:'#8b5cf6',ta:'#06b6d4',teacher:'#f59e0b',influencer:'#a855f7'};
+var BGC={content:'rgba(129,140,248,.12)',review:'rgba(245,158,11,.12)',caption:'rgba(236,72,153,.12)',lawyer:'rgba(148,163,184,.12)',engineer:'rgba(56,189,248,.12)',cfo:'rgba(16,185,129,.12)',marketing:'rgba(249,115,22,.12)',sales:'rgba(239,68,68,.12)',hr:'rgba(139,92,246,.12)',ta:'rgba(6,182,212,.12)',teacher:'rgba(245,158,11,.12)',influencer:'rgba(168,85,247,.12)'};
+var BCLS=['c0','c1','c2','c3','c4','c5','c6','c7','c8','c9','c0'];
+var APP={lang:'en',level:'g',car:'content',fields:{},tab:'i'};
+
+// ── UI STRINGS ─────────────────────────────────────────────────────────────
+var UI={
+  en:{inp:'Input',prev:'Preview',chars:'Chars',secs:'Sections',copy:'Copy Prompt',copied:'Copied!',fill:'Fill in fields to see your Prompt',fin:'Final Instruction',
+      lG:'General',lM:'Manager',lE:'Executive',lgd:'Everyday tasks',lmd:'Team decisions',led:'Board strategy',
+      hG:'🙋 General — everyday tasks, quick answers, clear summaries',
+      hM:'📊 Manager — data-driven decisions, team reports, structured planning',
+      hE:'🏆 Executive — board-level strategy, investment decisions, governance'},
+  th:{inp:'กรอกข้อมูล',prev:'ดูตัวอย่าง',chars:'ตัวอักษร',secs:'ส่วน',copy:'Copy Prompt',copied:'คัดลอกแล้ว!',fill:'กรอกข้อมูลเพื่อดู Prompt',fin:'คำสั่งสุดท้าย',
+      lG:'ทั่วไป',lM:'ผู้จัดการ',lE:'ผู้บริหาร',lgd:'งานประจำวัน',lmd:'ตัดสินใจทีม',led:'กลยุทธ์บอร์ด',
+      hG:'🙋 ทั่วไป — งานประจำวัน คำตอบรวดเร็ว สรุปข้อมูล',
+      hM:'📊 ผู้จัดการ — ตัดสินใจด้วยข้อมูล รายงานทีม วางแผน',
+      hE:'🏆 ผู้บริหาร — กลยุทธ์บอร์ด การลงทุน Governance'}
+};
+
+// ── CAREER META (both languages) ───────────────────────────────────────────
+var CMETA={
+  en:{
+    content:{n:'Content Creator',d:'Blog, article & storytelling'},
+    review:{n:'Goods Review',d:'Product & service reviews'},
+    caption:{n:'Caption / Post',d:'Social media captions'},
+    lawyer:{n:'Lawyer',d:'Legal analysis & drafting'},
+    engineer:{n:'Engineer',d:'Technical problem-solving'},
+    cfo:{n:'CFO',d:'Financial strategy & analysis'},
+    marketing:{n:'Digital Marketing',d:'Campaigns, ads & growth'},
+    sales:{n:'Sales Director',d:'Sales strategy & closing'},
+    hr:{n:'Human Resource',d:'HR policies & people ops'},
+    ta:{n:'Talent Acquisition',d:'Recruiting & hiring'},
+    teacher:{n:'Teacher',d:'Lesson plans & teaching aids'},
+    influencer:{n:'Influencer',d:'Personal brand & content'}
+  },
+  th:{
+    content:{n:'นักสร้างคอนเทนต์',d:'บล็อก บทความ เล่าเรื่อง'},
+    review:{n:'รีวิวสินค้า',d:'รีวิวสินค้าและบริการ'},
+    caption:{n:'แคปชั่นโพสต์',d:'แคปชั่นโซเชียลมีเดีย'},
+    lawyer:{n:'ทนายความ',d:'วิเคราะห์กฎหมายและร่างเอกสาร'},
+    engineer:{n:'วิศวกร',d:'แก้ปัญหาเทคนิค'},
+    cfo:{n:'CFO / ผู้บริหารการเงิน',d:'กลยุทธ์การเงิน'},
+    marketing:{n:'ดิจิทัลมาร์เก็ตติ้ง',d:'แคมเปญโฆษณา'},
+    sales:{n:'ผู้อำนวยการฝ่ายขาย',d:'กลยุทธ์การขาย'},
+    hr:{n:'ทรัพยากรบุคคล',d:'นโยบาย HR และวัฒนธรรม'},
+    ta:{n:'Talent Acquisition',d:'รับสมัครและจ้างงาน'},
+    teacher:{n:'ครู / อาจารย์',d:'แผนการสอนและสื่อการเรียน'},
+    influencer:{n:'อินฟลูเอนเซอร์',d:'แบรนด์ส่วนตัวและคอนเทนต์'}
+  }
+};
+
+// ── FIELD DATA — stored per language ──────────────────────────────────────
+// Structure: FD[lang][career][level] = [{s:'section name', fields:[{id,l,tip,ph,opts,rows}]}]
+var FD={en:{},th:{}};
+
+// ════════════════════════════════════════════════════════════════
+// ENGLISH FIELDS
+// ════════════════════════════════════════════════════════════════
+FD.en.content={
+  g:[
+    {s:'📝 What to Write',fields:[
+      {id:'topic',l:'What do you want to write about?',tip:'Say the main idea in plain words.',ph:'e.g. "5 tips for better sleep" or "How I save money every month"'},
+      {id:'audience',l:'Who will read this?',tip:'Picture one real person — age, job, problem they have.',ph:'e.g. "Working moms who want quick healthy meal ideas"'},
+      {id:'format',l:'Content style',opts:['Blog Post / Story','Step-by-step List','Q&A','Opinion Piece','Newsletter','Social Thread']},
+      {id:'tone',l:'How should it sound?',opts:['Friendly & Casual','Inspiring','Clear & Informative','Funny','Professional','Storytelling']},
+      {id:'length',l:'How long?',opts:['Under 300 words','300-600 words','600-1000 words','1000-2000 words']}
+    ]},
+    {s:'⚙️ Extra Details',fields:[
+      {id:'cta',l:'What should the reader do next?',tip:'Follow? Buy? Share?',ph:'e.g. "Follow my page" or "Download the free guide"'},
+      {id:'avoid',l:'What to avoid',ph:'e.g. "No jargon, no politics"'}
+    ]}
+  ],
+  m:[
+    {s:'📝 Content Brief',fields:[
+      {id:'topic',l:'Content topic and working title',tip:'Be specific — this guides the whole piece.',ph:'e.g. "2025 Guide: How Remote Teams Stay Productive Without Micromanagement"'},
+      {id:'objective',l:'Business objective of this content',tip:'Why is the company publishing this?',ph:'e.g. "Generate leads for our HR software targeting HR Managers"'},
+      {id:'audience',l:'Target audience persona',ph:'e.g. "HR Managers at 50-200 person companies frustrated with low team visibility"'},
+      {id:'format',l:'Desired format',opts:['Long-form guide','Listicle (numbered tips)','Case study','Thought leadership','Email series','Pillar page']},
+      {id:'tone',l:'Brand voice and tone',opts:['Authoritative & expert','Warm & approachable','Bold & challenger','Data-driven','Conversational']}
+    ]},
+    {s:'📊 Strategy and Output',fields:[
+      {id:'keywords',l:'Target SEO keywords',ph:'e.g. "remote team productivity (primary), WFH management tools (secondary)"'},
+      {id:'funnel',l:'Funnel stage',opts:['Awareness (problem unaware)','Consideration (exploring options)','Decision (ready to buy)','Retention (existing customers)']},
+      {id:'cta',l:'Desired conversion action',ph:'e.g. "Book a free demo" or "Download the Remote Work Playbook"'},
+      {id:'kpi',l:'How will this be measured?',ph:'e.g. "500 organic visits/month in 6 months, 50 demo requests"'},
+      {id:'avoid',l:'Brand and legal constraints',ph:'e.g. "Do not mention competitor names. Avoid ROI claims without data."'}
+    ]}
+  ],
+  e:[
+    {s:'🎯 Strategic Content Brief',fields:[
+      {id:'topic',l:'Content initiative and strategic theme',ph:'e.g. "Executive Perspective: The Hidden Cost of Poor Employee Wellbeing"'},
+      {id:'business_goal',l:'Business outcome this content supports',ph:'e.g. "Support Series B fundraising by positioning CEO as future-of-work authority"'},
+      {id:'audience',l:'Primary and secondary audience',ph:'e.g. "Primary: CHRO/CEO at enterprise. Secondary: investors, board, press"'}
+    ]},
+    {s:'📣 Positioning and Narrative',fields:[
+      {id:'positioning',l:'Thought leadership angle',ph:'e.g. "Companies investing in wellbeing outperform peers by 21% — our proprietary research"'},
+      {id:'narrative',l:'Core narrative arc',ph:'e.g. "Opens: most execs think wellbeing is HRs problem. Closes: it is the #1 CFO risk."'},
+      {id:'evidence',l:'Data and proof points to include',ph:'e.g. "Our 2025 Workforce Report: 68% of Fortune 500 CHROs cite burnout as top retention risk"'}
+    ]},
+    {s:'📊 Amplification and KPIs',fields:[
+      {id:'distribution',l:'Distribution plan',opts:['Press release + media outreach','CEO LinkedIn + paid amplification','Investor relations chapter','Conference keynote material','Integrated campaign']},
+      {id:'kpi',l:'Executive-level success metrics',ph:'e.g. "3 tier-1 media pickups, 10K LinkedIn impressions, cited in 2 investor conversations"'},
+      {id:'tone',l:'Voice and positioning',opts:['Visionary & bold','Data-driven & analytical','Empathetic & human-first','Challenger & provocative']}
+    ]}
+  ]
+};
+
+FD.en.review={
+  g:[
+    {s:'🛍 Product Info',fields:[
+      {id:'product',l:'Product or service name',tip:'Full name including brand.',ph:'e.g. "Dyson V15 Vacuum Cleaner"'},
+      {id:'category',l:'Type of product',opts:['Electronics','Skincare & Beauty','Food & Drink','Fashion','Home & Kitchen','Health & Fitness','App or Software','Service']},
+      {id:'price',l:'How much did it cost?',ph:'e.g. "$49" or "1,500 baht"'},
+      {id:'usage',l:'How long have you used it?',ph:'e.g. "Every day for 2 months"'}
+    ]},
+    {s:'⭐ Your Experience',fields:[
+      {id:'pros',l:'What did you LOVE? (one per line)',ph:'Battery lasts all day\nScreen bright in sunlight\nSet up in 5 minutes',rows:3},
+      {id:'cons',l:'What did you NOT like? (one per line)',ph:'Case scratches easily\nNo charger in box',rows:3},
+      {id:'rating',l:'Your score',opts:['1/5 - Terrible','2/5 - Disappointing','3/5 - OK','4/5 - Really Good','5/5 - Perfect!']},
+      {id:'verdict',l:'Final recommendation',opts:['Buy it! 100%','Yes — wait for a sale','Maybe — depends on budget','No — better options exist','No — waste of money']}
+    ]}
+  ],
+  m:[
+    {s:'🛍 Product Assessment',fields:[
+      {id:'product',l:'Product, service and vendor',ph:'e.g. "Salesforce Sales Cloud — Enterprise Plan (300 seats)"'},
+      {id:'category',l:'Product category',opts:['B2B Software / SaaS','Hardware / Equipment','Professional Service','Enterprise Platform','API / Integration','Physical Product']},
+      {id:'price',l:'Total cost and pricing model',ph:'e.g. "$2,400/year per seat + $15K implementation fee"'},
+      {id:'context',l:'Business context — why evaluated?',ph:'e.g. "Evaluating to replace HubSpot as team scaled past 100 reps"'}
+    ]},
+    {s:'📊 Evaluation',fields:[
+      {id:'pros',l:'Strengths — what works well',ph:'Native integration saved 8hrs/week\nDashboard visible to all managers',rows:3},
+      {id:'cons',l:'Weaknesses and gaps',ph:'Onboarding took 6 weeks vs promised 2\nMobile app unusable for field reps',rows:3},
+      {id:'compare',l:'Alternatives evaluated',ph:'e.g. "HubSpot: better UX, less customizable. Dynamics: cheaper, weaker support."'},
+      {id:'roi',l:'Business impact and ROI',ph:'e.g. "15% better pipeline visibility. Sales cycle down from 45 to 38 days."'},
+      {id:'verdict',l:'Team recommendation',opts:['Strongly recommend — renewing','Recommend with conditions','Neutral — needs improvement','Not recommending']}
+    ]}
+  ],
+  e:[
+    {s:'🏢 Vendor Strategic Assessment',fields:[
+      {id:'product',l:'Vendor, product and contract scope',ph:'e.g. "Oracle ERP Cloud — 3-year agreement, $2.4M TCV, 800 users"'},
+      {id:'strategic_fit',l:'Strategic fit assessment',ph:'e.g. "Critical to ERP consolidation — replacing 4 legacy systems by Q3"'},
+      {id:'risk',l:'Vendor risk profile',ph:'e.g. "Single-source risk: 60% of AP processing. SOC2 Type II certified."'}
+    ]},
+    {s:'📊 Financial Impact',fields:[
+      {id:'tco',l:'Total Cost of Ownership (3-year)',ph:'e.g. "Year 1: $1.8M. Year 2-3: $600K/year. 3yr TCO: $3M"'},
+      {id:'roi',l:'Quantified business value and ROI',ph:'e.g. "22% reduction in finance headcount, $1.4M annual saving. Payback: 26 months."'},
+      {id:'risks_ops',l:'Operational risks and mitigation',ph:'e.g. "Migration risk: parallel run 60 days. Exit clause after Year 1."'}
+    ]},
+    {s:'🏆 Board Recommendation',fields:[
+      {id:'verdict',l:'Executive recommendation',opts:['Approve — full deployment','Approve with conditions','Hold — vendor must remediate','Reject — re-tender']},
+      {id:'next_steps',l:'Next steps and timeline',ph:'e.g. "Board approval Oct 15. T&Cs Oct 30. Go-live Jan 1."'},
+      {id:'output',l:'Output format needed',opts:['Board paper (1-page summary)','Full vendor evaluation report','Investment committee memo','Procurement scorecard']}
+    ]}
+  ]
+};
+
+FD.en.caption={
+  g:[
+    {s:'📸 Post Details',fields:[
+      {id:'platform',l:'Platform',opts:['Instagram Feed','Instagram Reel/Story','Facebook','TikTok','LinkedIn','X / Twitter','Threads','Pinterest']},
+      {id:'visual',l:'Describe your photo or video',tip:'AI cannot see it — describe it clearly.',ph:'e.g. "Me at a cafe, holding a latte, cozy autumn vibe, beige sweater"'},
+      {id:'goal',l:'Why are you posting?',opts:['Get likes & comments','Promote a product','Share something personal','Grow followers','Drive website traffic']},
+      {id:'mood',l:'What feeling should it give?',opts:['Happy & positive','Motivated','Curious','Funny','Inspired','FOMO']}
+    ]},
+    {s:'✍️ Caption Style',fields:[
+      {id:'brand',l:'Your posting style',ph:'e.g. "Fun and casual, lots of emojis, always positive"'},
+      {id:'hashtags',l:'Hashtag preference',opts:['3-5 specific','10-15 mixed','20-30 max reach','None']},
+      {id:'cta',l:'What should people do?',ph:'e.g. "Tag a friend!" or "Comment below"'},
+      {id:'variants',l:'How many versions?',opts:['Just 1','2 options','3 styles (short/medium/long)']}
+    ]}
+  ],
+  m:[
+    {s:'📸 Content Brief',fields:[
+      {id:'platform',l:'Platform and placement',opts:['Instagram Feed — organic','Instagram Reel — reach campaign','Facebook page post','LinkedIn company page','TikTok brand account','Multi-platform']},
+      {id:'visual',l:'Creative description',ph:'e.g. "Product hero shot — Midnight Blue against concrete background, studio lit"'},
+      {id:'campaign',l:'Campaign this post belongs to',ph:'e.g. "Q4 Holiday — Gift Yourself theme. Post 3 of 6."'},
+      {id:'audience',l:'Target segment for this post',ph:'e.g. "Millennial women 25-34, urban, high income, fashion-forward"'}
+    ]},
+    {s:'📊 Strategy and Copy',fields:[
+      {id:'goal',l:'Post KPI and business goal',opts:['Engagement rate (likes, comments)','Click-through to product page','Story swipe-up conversion','Save rate','Reach & impressions']},
+      {id:'message',l:'Core message and key selling point',ph:'e.g. "This is the last bag you will ever need — built to outlast trends"'},
+      {id:'tone',l:'Brand voice for this post',opts:['Premium & aspirational','Bold & challenger','Warm & community','Educational','Playful & viral']},
+      {id:'hashtags',l:'Hashtag strategy',opts:['Brand hashtag only','Niche community (5-10)','Mixed brand + trending (15-25)','Paid — no hashtags']},
+      {id:'cta',l:'Primary CTA',ph:'e.g. "Shop the link in bio" or "Save for your wish list"'},
+      {id:'variants',l:'Copy variants needed',opts:['1 approved version','2 for A/B test','3 platform-adapted versions']}
+    ]}
+  ],
+  e:[
+    {s:'🎯 Brand Communication Strategy',fields:[
+      {id:'platform',l:'Channel mix and content pillar',ph:'e.g. "Instagram + LinkedIn + paid dark posts — Lead Boldly campaign"'},
+      {id:'brand_position',l:'Brand positioning this reinforces',ph:'e.g. "Innovation leader — contrasting us vs legacy competitors"'},
+      {id:'audience',l:'Priority audience and personas',ph:'e.g. "CFOs 45-60: currently see our category as cost centre. Goal: reframe as growth lever."'}
+    ]},
+    {s:'📣 Campaign Architecture',fields:[
+      {id:'campaign',l:'Campaign name, theme and season',ph:'e.g. "FY25 Q1: The Decisive Edge — C-suite target, Jan-Mar"'},
+      {id:'message',l:'Master message and proof points',ph:'e.g. "We make leaders decisive. Proof: 40% faster decisions, 3x ROI, 200 Fortune 500 users"'},
+      {id:'narrative',l:'Narrative arc across posts',ph:'e.g. "Week 1: Problem. Week 2: Solution. Week 3: Social proof. Week 4: CTA."'}
+    ]},
+    {s:'📊 Measurement and Governance',fields:[
+      {id:'kpi',l:'Campaign KPIs and attribution',ph:'e.g. "2M impressions. 3%+ engagement. 500 qualified leads. UTM attribution."'},
+      {id:'compliance',l:'Legal and brand governance',ph:'e.g. "Must include disclosure on paid posts. No performance claims without data source."'},
+      {id:'output',l:'Deliverables required',opts:['Full caption suite (10 posts)','Campaign messaging framework','Copy + visual direction brief','Multi-platform guide']}
+    ]}
+  ]
+};
+
+FD.en.lawyer={
+  g:[
+    {s:'⚖️ Your Situation',fields:[
+      {id:'area',l:'Area of law',opts:['Contract (agreements)','Employment / Work','Business / Company','Copyright & IP','Criminal','Property / Real Estate','Family law','Going to court']},
+      {id:'task',l:'What do you need? (plain words)',tip:'Describe like telling a friend who is a lawyer.',ph:'e.g. "I hired a freelancer, paid them, they disappeared. I need a demand letter."',rows:3},
+      {id:'parties',l:'Who is involved?',ph:'e.g. "Me: John (client). Them: ABC Design Co."'},
+      {id:'country',l:'Which country?',ph:'e.g. "Thailand" or "California, USA"'}
+    ]},
+    {s:'📋 Details and Goal',fields:[
+      {id:'dates',l:'Key dates',ph:'e.g. "Signed: Jan 5. Paid: Feb 10. They disappeared: March 1."'},
+      {id:'evidence',l:'Proof you have',ph:'e.g. "WhatsApp screenshots, signed PDF, bank transfer slips"'},
+      {id:'goal',l:'What outcome do you want?',ph:'e.g. "My $2,000 back" or "Them to stop using my logo"'},
+      {id:'output',l:'What should I write?',opts:['Demand Letter','Draft a Contract','Explain my rights (plain language)','Risk analysis','Full legal memo']}
+    ]}
+  ],
+  m:[
+    {s:'⚖️ Legal Matter Overview',fields:[
+      {id:'area',l:'Practice area and sub-matter',opts:['Commercial contracts & disputes','Employment law','Corporate / M&A / Governance','IP & licensing','Data protection (PDPA/GDPR)','Regulatory & compliance','Real estate','Litigation & arbitration']},
+      {id:'task',l:'Legal instruction and matter summary',ph:'e.g. "Review and redline MSA with new US SaaS vendor. Company is data controller under PDPA."',rows:3},
+      {id:'parties',l:'Parties and their roles',ph:'e.g. "Our company (Thai entity, buyer). Vendor: Acme Inc. (Delaware, seller)."'},
+      {id:'jurisdiction',l:'Governing law and jurisdiction',ph:'e.g. "Thai law governs. Disputes: ICC arbitration, Singapore seat."'}
+    ]},
+    {s:'📊 Risk and Deliverables',fields:[
+      {id:'key_issues',l:'Key legal issues to address',ph:'Liability cap: negotiate 1x to 3x\nData residency: Thailand or Singapore only\nIP ownership: all custom dev assigns to us\nTermination: 30-day notice needed',rows:4},
+      {id:'constraints',l:'Business constraints and non-negotiables',ph:'e.g. "Cannot agree to US governing law. Need internal-ready redline."'},
+      {id:'risk',l:'Risk level',opts:['Low — manager approval','Medium — legal team review','High — GC sign-off needed','Critical — board notification']},
+      {id:'output',l:'Deliverable required',opts:['Redlined contract with comments','Legal risk matrix','Executive summary for non-lawyers','Negotiation position paper','Full legal opinion']}
+    ]}
+  ],
+  e:[
+    {s:'⚖️ Board-Level Legal Matter',fields:[
+      {id:'area',l:'Legal domain and strategic context',ph:'e.g. "M&A due diligence: proposed acquisition of FinCo (Thailand) for $45M. BOT approval required."',rows:2},
+      {id:'task',l:'Board-level legal question or mandate',ph:'e.g. "Board needs: (1) maximum liability exposure, (2) go/no-go criteria, (3) disclosure obligations."',rows:3},
+      {id:'jurisdiction',l:'Jurisdictions and regulatory bodies',ph:'e.g. "Thailand (SEC, BOT), Singapore (MAS). Thai law primary, Singapore arbitration."'}
+    ]},
+    {s:'📊 Risk and Exposure',fields:[
+      {id:'exposure',l:'Maximum financial and reputational exposure',ph:'e.g. "Worst case: $12M liability + regulatory fine up to 5% revenue + licence revocation risk"'},
+      {id:'precedent',l:'Precedent and regulatory environment',ph:'e.g. "SEC tightened M&A disclosure rules Q1 2025. Competitor fined $8M for similar omission."'},
+      {id:'stakeholders',l:'Key internal and external stakeholders',ph:'e.g. "Internal: Board, CFO, Audit Committee. External: Baker McKenzie, Big 4 forensics."'}
+    ]},
+    {s:'🏆 Board Output Required',fields:[
+      {id:'decision',l:'Decisions the board must make',ph:'e.g. "Resolution 1: Approve transaction. Resolution 2: Authorise CEO to execute."'},
+      {id:'output',l:'Board deliverable format',opts:['Board paper with legal opinion','Risk register update','Regulatory submission draft','Shareholder circular','Settlement authority memo']},
+      {id:'timeline',l:'Decision timeline',ph:'e.g. "Board meeting Oct 20. Regulatory filing Nov 1. Long-stop date Dec 31."'}
+    ]}
+  ]
+};
+
+FD.en.engineer={
+  g:[
+    {s:'🔧 The Problem',fields:[
+      {id:'field',l:'Type of engineering',opts:['Software / App','Mechanical','Electrical / Electronics','Civil','Chemical','Data / AI / ML','Cloud / DevOps','Hardware / Product']},
+      {id:'problem',l:'Describe the problem',tip:'What is broken or needs to be built? Plain language is fine.',ph:'e.g. "Our website crashes when more than 500 people use it at the same time."',rows:3},
+      {id:'current',l:'What exists already?',ph:'e.g. "WordPress site on shared hosting, 2 years old, 2-person dev team"'},
+      {id:'limits',l:'Your limits',ph:'e.g. "Budget $500/month, must use AWS, deadline 6 weeks"'}
+    ]},
+    {s:'⚙️ Output Needed',fields:[
+      {id:'stack',l:'Tools and tech you use',ph:'e.g. "Python, React, MySQL, AWS"'},
+      {id:'scale',l:'How big is this?',ph:'e.g. "1,000 users/day now, expecting 10,000 in 6 months"'},
+      {id:'output',l:'What do you need?',opts:['Step-by-step plan','Code example with explanation','Comparison of approaches','Architecture diagram (text)','Checklist','Technical spec']}
+    ]}
+  ],
+  m:[
+    {s:'🔧 Technical Initiative',fields:[
+      {id:'field',l:'Engineering domain',opts:['Software architecture & systems design','Platform / cloud infrastructure','Data engineering & analytics','DevOps / SRE / CI-CD','Mobile & frontend','AI / ML engineering','Security engineering','Embedded / hardware']},
+      {id:'problem',l:'Problem statement and business impact',tip:'Frame as a business problem, not just technical.',ph:'e.g. "Payment service P99 latency >3s during peak. 12% cart abandonment. ~$80K/month revenue impact."',rows:3},
+      {id:'current',l:'Current state and technical debt',ph:'e.g. "Monolithic Rails app, single RDS instance, no caching layer, EC2 t3.medium"'},
+      {id:'requirements',l:'Functional and non-functional requirements',ph:'P99 latency <500ms\n99.9% uptime SLA\nHandle 10x traffic spikes\nNo downtime deployment\nGDPR compliant',rows:4}
+    ]},
+    {s:'📊 Constraints and Deliverables',fields:[
+      {id:'constraints',l:'Technical and resource constraints',ph:'e.g. "Team: 3 backend, 1 DevOps. Budget $5K/month infra. 8-week window."'},
+      {id:'stack',l:'Current and target tech stack',ph:'e.g. "Current: Rails 6, PostgreSQL, Heroku. Target: Rails 7, PgBouncer, Redis, AWS ECS."'},
+      {id:'risk',l:'Technical risks and dependencies',ph:'e.g. "Schema migration on 50M row table. Payment API rate limits. Team new to Kubernetes."'},
+      {id:'output',l:'Engineering deliverable format',opts:['RFC (Request for Comments)','Architecture Decision Record (ADR)','Sprint-level implementation plan','Tech spike report','Engineering spec + effort estimate']}
+    ]}
+  ],
+  e:[
+    {s:'🏗 Technology Strategy',fields:[
+      {id:'initiative',l:'Strategic technology initiative',ph:'e.g. "Platform re-architecture for real-time personalisation — supporting 10x revenue growth over 3 years"',rows:2},
+      {id:'business_case',l:'Business case and strategic rationale',ph:'e.g. "Competitors launched real-time features Q2. Our batch processing causes 8% churn. TAM impact: $40M annually."',rows:2},
+      {id:'current',l:'Current technology landscape',ph:'e.g. "Legacy monolith 12 years old, 3.2M lines, 200 engineers, $8M/year infra, 18-month feature backlog"'}
+    ]},
+    {s:'💰 Investment and Risk',fields:[
+      {id:'investment',l:'Investment required',ph:'e.g. "CapEx $4.2M (Year 1: $2.8M, Year 2: $1.4M). OpEx increase $600K/year."'},
+      {id:'risk',l:'Strategic and operational risks',ph:'e.g. "18-month migration cost. 40% engineer turnover risk. Regulatory scrutiny on data architecture."'},
+      {id:'timeline',l:'Multi-year roadmap',ph:'e.g. "Phase 1 Q1-Q2: Core data layer. Phase 2 Q3: Real-time APIs. Phase 3 Q4: Personalisation engine."'}
+    ]},
+    {s:'🏆 Board Output',fields:[
+      {id:'tradeoffs',l:'Strategic trade-offs for board decision',ph:'e.g. "Option A: Full rebuild $4.2M 18mo. Option B: Hybrid strangler $2.1M 24mo. Option C: Buy vs build."'},
+      {id:'output',l:'Board deliverable required',opts:['Technology investment proposal','Build vs buy analysis','Technology risk register','3-year technology roadmap','CTO briefing for investors']}
+    ]}
+  ]
+};
+
+FD.en.cfo={
+  g:[
+    {s:'💰 Financial Task',fields:[
+      {id:'task',l:'What financial task do you need?',tip:'Plain words — raise money, cut costs, plan budget?',ph:'e.g. "Show investors how we grow from $1M to $5M in 3 years"',rows:2},
+      {id:'biz',l:'Your business in a nutshell',ph:'e.g. "Monthly SaaS for restaurants. 80 customers, $800K revenue/year, 3 years old."'},
+      {id:'numbers',l:'Your current money numbers',ph:'e.g. "Monthly sales $70K. Expenses $55K. Profit $15K. Cash $120K"'},
+      {id:'horizon',l:'Time period',opts:['Next month / quarter','This year (12 months)','2-3 years','5 years']}
+    ]},
+    {s:'⚙️ Output',fields:[
+      {id:'worry',l:'Biggest financial concern',ph:'e.g. "We run out of cash in 4 months if we do not close new deals"'},
+      {id:'scenarios',l:'Planning scenarios',opts:['Just the realistic plan','Best + realistic','Worst + realistic','All 3 scenarios']},
+      {id:'output',l:'Format needed',opts:['Simple summary','Numbers table / projection','Investor narrative','Budget plan']}
+    ]}
+  ],
+  m:[
+    {s:'💰 Financial Analysis Brief',fields:[
+      {id:'task',l:'Financial analysis mandate',ph:'e.g. "Build vs buy analysis for CRM: Salesforce vs internal build. Decision needed by board Q3."',rows:2},
+      {id:'company',l:'Business overview',ph:'e.g. "B2B SaaS, Series A, ARR $3.2M, 42% YoY growth, 85% gross margin, 18-month runway"'},
+      {id:'financials',l:'Current P&L highlights',ph:'MRR: $267K | Churn: 2.1% | CAC: $4,200 | LTV: $38,000\nHeadcount: 34 | Burn: $185K/month | Cash: $3.3M',rows:3},
+      {id:'horizon',l:'Planning horizon',opts:['Monthly operational review','Quarterly board pack','Annual budget & forecast','3-year strategic plan','Fundraising financial model']}
+    ]},
+    {s:'📊 Analysis Requirements',fields:[
+      {id:'scenarios',l:'Scenario modelling required',opts:['Base case only','Base + upside + downside','Sensitivity analysis','Scenario vs budget variance']},
+      {id:'kpis',l:'KPIs and metrics to include',ph:'ARR, MRR, Net Revenue Retention\nCAC payback period\nRule of 40 score\nGross margin by segment\nRunway under each scenario',rows:4},
+      {id:'audience',l:'Report audience',opts:['CFO / Finance team','CEO & leadership team','Board of directors','Investors / VCs','Audit committee']},
+      {id:'output',l:'Deliverable format',opts:['Financial model structure','Board-ready narrative + tables','Variance analysis vs budget','Capital allocation recommendation']}
+    ]}
+  ],
+  e:[
+    {s:'💰 Board Financial Agenda',fields:[
+      {id:'agenda',l:'Board financial agenda item',ph:'e.g. "Agenda Item 4: Approve FY26 budget $28M (+34% YoY) and authorise $8M Series B drawdown for APAC expansion"',rows:2},
+      {id:'company',l:'Company financial snapshot',ph:'ARR: $12.4M | NRR: 118% | Gross Margin: 74%\nBurn: $420K/month | Runway: 22 months\nValuation (last round): $85M at 6.8x ARR\nTarget: $40M ARR by FY27',rows:4},
+      {id:'strategic_context',l:'Strategic context driving this decision',ph:'e.g. "APAC entry: 3 enterprise LOIs from Singapore, competitor raised $50M targeting APAC Q2"'}
+    ]},
+    {s:'📊 Capital and Risk',fields:[
+      {id:'capital',l:'Capital requirement and use of funds',ph:'e.g. "Total $8M over 24 months: S&M 45% ($3.6M), Headcount 35% ($2.8M), Infra 20% ($1.6M)."'},
+      {id:'scenarios',l:'Scenario analysis for board',ph:'e.g. "Bull: $6M ARR from APAC (25% probability). Base: $3.2M (60%). Bear: $1.1M (15%)."'},
+      {id:'risk',l:'Key financial risks and mitigations',ph:'e.g. "FX exposure $2.1M (hedged 60%). Hire plan slippage contingency: partner model. Top 3 accounts = 38% ARR."'}
+    ]},
+    {s:'🏆 Board Decision and Output',fields:[
+      {id:'decision',l:'Resolutions the board must approve',ph:'e.g. "Resolution 1: Approve $28M FY26 budget. Resolution 2: Authorise $8M Series B tranche 2."'},
+      {id:'output',l:'Board document format',opts:['Full board paper with appendices','CFO presentation deck (10 slides)','One-page executive financial summary','Capital allocation framework','Investor update letter']}
+    ]}
+  ]
+};
+
+FD.en.marketing={
+  g:[
+    {s:'📣 Campaign Basics',fields:[
+      {id:'product',l:'What are you promoting?',ph:'e.g. "A meal planning app that helps busy families decide what to cook"'},
+      {id:'goal',l:'Campaign goal',opts:['Brand awareness','Get sign-ups','Get sales / purchases','App downloads','Win back old customers','New product launch']},
+      {id:'audience',l:'Ideal customer',ph:'e.g. "Parents 28-40 who hate deciding what to cook after work"'},
+      {id:'usp',l:'Why are you better?',ph:'e.g. "Only app that auto-adds ingredients to your grocery cart"'}
+    ]},
+    {s:'⚙️ Channels and Budget',fields:[
+      {id:'channels',l:'Where will you advertise?',opts:['Facebook & Instagram Ads','Google Ads','TikTok Ads','YouTube Ads','Email marketing','SEO (organic)','LINE / WhatsApp','Influencer partnerships']},
+      {id:'budget',l:'Monthly budget',opts:['Under $300','$300-$1,000','$1,000-$5,000','$5,000-$20,000','$20,000+']},
+      {id:'output',l:'What do you need?',opts:['Campaign strategy','Ad copy (write the ads)','Email campaign','Content calendar','Landing page copy','Funnel map']}
+    ]}
+  ],
+  m:[
+    {s:'📣 Marketing Campaign Brief',fields:[
+      {id:'product',l:'Product / service and value proposition',ph:'e.g. "Pricebook Pro — AI-powered competitive pricing. USP: auto-repricing in under 30 seconds vs industry 4hr avg."'},
+      {id:'objective',l:'SMART campaign objective',ph:'e.g. "Generate 300 MQLs in Q3 at CPL up to $45 from mid-market e-commerce companies"'},
+      {id:'audience',l:'Target segment and persona',ph:'e.g. "Head of E-commerce. Pain: manual repricing 4x/day. Trigger: competitor undercut them last month."'},
+      {id:'budget',l:'Campaign budget and allocation',ph:'e.g. "Total: $45K. Paid media 60% ($27K): Google 40%, LinkedIn 20%. Content 25% ($11K). Events 15% ($7K)."'}
+    ]},
+    {s:'📊 Channel Strategy and KPIs',fields:[
+      {id:'channels',l:'Channel mix and rationale',ph:'e.g. "LinkedIn (B2B primary): $20K. Google Search (intent): $7K. Retargeting: $5K. Webinar: $8K."'},
+      {id:'kpi',l:'KPIs and measurement framework',ph:'Awareness: 500K impressions\nAcquisition: 300 MQLs, CPL up to $45\nActivation: 60 SQLs, 20% MQL-to-SQL\nPipeline: $2.1M influenced\nROI: 5x ROAS by Q4',rows:5},
+      {id:'message',l:'Message hierarchy and creative direction',ph:'e.g. "Hook: Stop losing on price. Proof: 340 brands repricing real-time. CTA: See it in 10 minutes."'},
+      {id:'output',l:'Campaign deliverable',opts:['Full integrated campaign plan','Media plan + budget breakdown','Ad copy suite (5 variations per channel)','Email nurture sequence','Campaign brief for agency']}
+    ]}
+  ],
+  e:[
+    {s:'🎯 Go-to-Market Strategy',fields:[
+      {id:'initiative',l:'GTM initiative and business context',ph:'e.g. "Series B GTM: Launch enterprise tier ($50K+ ACV) targeting Fortune 500. ARR target: $5M new business FY25."',rows:2},
+      {id:'market',l:'Market opportunity and competitive landscape',ph:'e.g. "TAM: $4.2B. SAM: $380M. Market share: 2.1%. Competitors: Prisync (bootstrapped), Wiser (PE-backed). Differentiation: real-time AI."',rows:3},
+      {id:'audience',l:'ICP and buying committee',ph:'e.g. "ICP: Enterprise e-commerce >$100M GMV. Buying committee: CFO (economic buyer), Head of E-commerce (champion)."'}
+    ]},
+    {s:'💰 Investment and Execution',fields:[
+      {id:'budget',l:'Marketing budget and ROI expectation',ph:'e.g. "FY25 marketing budget: $2.8M (28% of projected ARR). CAC target: up to $8,500. Payback: under 18 months."'},
+      {id:'channels',l:'Channel architecture',ph:'e.g. "Demand gen 45%: paid search, LinkedIn ABM. Brand 25%: PR, events. Partner 20%: reseller. PLG 10%."'},
+      {id:'risks',l:'Market and execution risks',ph:'e.g. "Enterprise sales cycle 6-9 months. Competitor raising $30M (rumoured). 3 key marketers at attrition risk."'}
+    ]},
+    {s:'🏆 Board-Level Output',fields:[
+      {id:'decision',l:'Strategic decision required',ph:'e.g. "Board approval for $800K incremental budget for enterprise ABM targeting 50 Fortune 500 accounts."'},
+      {id:'output',l:'Executive deliverable format',opts:['GTM strategy board paper','Investor narrative (marketing section)','Competitive positioning framework','Brand architecture recommendation']}
+    ]}
+  ]
+};
+
+FD.en.sales={
+  g:[
+    {s:'🎯 Selling Situation',fields:[
+      {id:'product',l:'What are you selling?',ph:'e.g. "Security cameras for small shops — records 24/7, sends phone alerts"'},
+      {id:'customer',l:'Ideal customer',ph:'e.g. "Shop owners 35-55 who have been robbed or worry about theft"'},
+      {id:'stage',l:'Where in the sales process?',opts:['Finding new customers','First contact / cold outreach','Had first meeting — following up','Presenting price / proposal','Negotiating / discount talk','Almost closed — final details','Existing customer — selling more']},
+      {id:'objections',l:'Objections you have heard (one per line)',ph:'"Too expensive"\n"We already have something"\n"Need to ask my manager"',rows:3}
+    ]},
+    {s:'⚙️ Your Situation',fields:[
+      {id:'strength',l:'Your biggest selling point',ph:'e.g. "Install in 1 day, 3-year warranty — nobody else does that"'},
+      {id:'target',l:'Your sales target',ph:'e.g. "Target $30K this month. Currently at $12K."'},
+      {id:'output',l:'What help do you need?',opts:['Call script','Prospect email','Handle the objections above','Sales strategy for this month','Proposal template','How to close the deal']}
+    ]}
+  ],
+  m:[
+    {s:'🎯 Sales Management Brief',fields:[
+      {id:'product',l:'Product / solution and ICP',ph:'e.g. "Fleet telematics SaaS. ICP: logistics companies 50-500 vehicles, APAC, using manual GPS trackers."'},
+      {id:'pipeline',l:'Pipeline health snapshot',ph:'Open pipeline: $3.8M across 42 opportunities\nAverage deal size: $90K ACV\nAverage sales cycle: 78 days\nWin rate: 24% (target 30%)\nPipeline coverage: 2.1x (need 3x)',rows:5},
+      {id:'team',l:'Team structure and performance gap',ph:'e.g. "8 AEs. Top 2 at 140% quota. Middle 4 at 75-90%. Bottom 2 at under 50%. Gap: discovery quality."'},
+      {id:'stage',l:'Primary sales challenge',opts:['Top-of-funnel: pipeline generation','Mid-funnel: deal qualification','Late-stage: negotiation & closing','Expansion: upsell / cross-sell','Team performance & coaching','Forecast accuracy & CRM hygiene']}
+    ]},
+    {s:'📊 Strategy and Execution',fields:[
+      {id:'competition',l:'Competitive dynamics',ph:'e.g. "Primary competitor: Samsara. Win theme: local support + lower TCO. Displacement rate: 30% of pipeline."'},
+      {id:'objections',l:'Most common objections at each stage',ph:'Discovery: "No budget this year"\nProposal: "Your price is 30% higher"\nClose: "Wait for new FY"\nGeneral: "Can we pilot first?"',rows:4},
+      {id:'quota',l:'Quota attainment and forecast',ph:'e.g. "Q3 target: $2.1M. Commit: $1.4M. Best case: $1.9M. Gap: $700K. 6 deals in final stage."'},
+      {id:'output',l:'Sales management deliverable',opts:['Sales playbook for the team','Deal coaching framework (MEDDPICC / SPIN)','Objection handling guide with scripts','QBR deck structure','Pipeline review template']}
+    ]}
+  ],
+  e:[
+    {s:'🏆 Revenue Strategy',fields:[
+      {id:'revenue_goal',l:'Revenue goal and strategic context',ph:'e.g. "FY25 ARR target: $18M (+67% YoY). New logo: $8M. Expansion: $5M. Churn budget: under $400K. Series B covenant: $15M ARR by Dec."',rows:2},
+      {id:'market',l:'Market and competitive position',ph:'e.g. "Market share: 4.2% of $1.8B APAC market. Win rate vs top 3 competitors: 34%. ASP trend: +12% YoY. NPS: 67."'},
+      {id:'team',l:'GTM organisation and capacity',ph:'e.g. "24 AEs (6 enterprise, 12 mid-market, 6 SMB) + 8 SDRs. Capacity: $22M bookings. Gap: need 4 enterprise AEs."'}
+    ]},
+    {s:'💰 Revenue Model and Risk',fields:[
+      {id:'model',l:'Revenue model and unit economics',ph:'e.g. "ACV range: $18K-$380K. Avg new logo ACV: $72K. Magic number: 0.9 (target 1.2). Payback: 16 months."'},
+      {id:'scenarios',l:'Revenue scenarios for board',ph:'e.g. "Conservative: $14.2M. Base: $18M. Stretch: $21M (3 enterprise deals in negotiation, $4.8M combined)."'},
+      {id:'risks',l:'Revenue risks and mitigation',ph:'e.g. "Top 5 accounts = 31% ARR. SDR pipeline 40% below Q3 need. APAC macro: 2 deals delayed to Q4."'}
+    ]},
+    {s:'🏆 Board Decision and Output',fields:[
+      {id:'decision',l:'Revenue decisions required from board',ph:'e.g. "1. Approve $1.2M incremental S&M budget. 2. Extend Series B covenant 60 days. 3. Approve APAC pricing strategy."'},
+      {id:'output',l:'Board deliverable format',opts:['Revenue board paper with scenario analysis','CRO investor presentation section','GTM operating plan','Sales capacity & headcount model','Customer concentration & renewal risk report']}
+    ]}
+  ]
+};
+
+FD.en.hr={
+  g:[
+    {s:'👥 HR Situation',fields:[
+      {id:'challenge',l:'HR challenge you are facing',opts:['Writing a company policy','Underperforming employee','Employee happiness / culture','Salary & benefits','Conflict between staff','Letting someone go','Building team culture','Labour law compliance']},
+      {id:'situation',l:'Tell me what is happening',tip:'Like telling a trusted friend. What? Who? How long?',ph:'e.g. "Our top salesperson has arrived late every day for 3 weeks. Manager spoke twice but nothing changed."',rows:3},
+      {id:'company',l:'Company size and type',ph:'e.g. "60 employees, tech startup, 3 years old, Bangkok office"'},
+      {id:'tried',l:'What have you already tried?',ph:'e.g. "1-on-1 talk, written warning, offered flexible hours — nothing worked"'}
+    ]},
+    {s:'⚙️ Goal and Output',fields:[
+      {id:'rules',l:'Any relevant rules or laws?',ph:'e.g. "Thailand Labour Protection Act. Handbook: 3 warnings before termination."'},
+      {id:'goal',l:'What result do you want?',ph:'e.g. "Employee improves OR exits with dignity, team morale intact"'},
+      {id:'urgency',l:'How urgent?',opts:['Handle this week','Within 2-4 weeks','Planning ahead (1-3 months)','Long-term project']},
+      {id:'output',l:'What should I create?',opts:['HR policy document','Action plan (step by step)','Draft message to employee','Manager coaching guide','Staff survey','Training agenda']}
+    ]}
+  ],
+  m:[
+    {s:'👥 People Management Brief',fields:[
+      {id:'challenge',l:'People management challenge',opts:['Performance management (PIP)','Employee relations & disciplinary','Organisational restructure','Compensation benchmarking','Culture & engagement programme','Talent retention & flight risk','Learning & development','HRBP business partnering']},
+      {id:'situation',l:'Situation detail and business impact',ph:'e.g. "Engineering team (32 people) has 28% voluntary attrition YTD vs 12% company avg. 3 product launches delayed. $2M ARR at risk."',rows:3},
+      {id:'company',l:'Organisation context',ph:'e.g. "Series B SaaS, 180 FTEs, 60% engineering, remote-first, avg tenure 2.1 years, eNPS 28 (industry: 42)"'},
+      {id:'policy',l:'Relevant policy and legal framework',ph:'e.g. "Thailand Labour Protection Act. 3-strike disciplinary policy. PIP template exists. 40% fixed-term, 60% indefinite."'}
+    ]},
+    {s:'📊 Analysis and Deliverables',fields:[
+      {id:'data',l:'People data and insights',ph:'Engagement survey: 54% favourable (down 11pts YoY)\nExit interviews: "lack of career growth" 67%\nTenure by dept: Eng 1.8yr, Sales 2.6yr, G&A 3.1yr\nPromotion rate: 8% (market: 15%)',rows:4},
+      {id:'stakeholders',l:'Stakeholders and approval required',ph:'e.g. "CHRO sponsoring. Engineering VPs as co-owners. Finance: headcount budget needs CFO sign-off."'},
+      {id:'timeline',l:'Implementation timeline',ph:'e.g. "Week 1-2: Root cause. Week 3-4: Retention package. Month 2: Manager training. Month 3: Rollout."'},
+      {id:'output',l:'HR deliverable format',opts:['People strategy memo','Retention programme design','PIP documentation suite','Restructure communication plan','Compensation framework update','Board people metrics dashboard']}
+    ]}
+  ],
+  e:[
+    {s:'🏆 People Strategy Agenda',fields:[
+      {id:'agenda',l:'Board people agenda item',ph:'e.g. "Board Item 6: Workforce Strategy FY26 — addressing AI/ML engineering and APAC leadership gaps to support $40M ARR target"',rows:2},
+      {id:'org_context',l:'Organisational health snapshot',ph:'Headcount: 340 (target 420 by EOY)\nVoluntary attrition: 19% (industry: 14%)\neNPS: 34 (target 50)\nInternal promotion rate: 11% (target 18%)\nSenior women: 22% (target 35%)\nL&D per FTE: $820 (industry: $1,400)',rows:5},
+      {id:'strategic_link',l:'Link to business strategy',ph:'e.g. "AI/ML gap threatens product roadmap Q3-Q4 (6 features delayed). APAC gap delays $8M market entry. Investor concern flagged in last DD."'}
+    ]},
+    {s:'💼 Investment and Risk',fields:[
+      {id:'investment',l:'People investment required',ph:'e.g. "FY26 incremental: $4.2M. Breakdown: Compensation uplift $1.8M, L&D $600K, APAC hires x4 $1.2M, DEI programme $600K."'},
+      {id:'risk',l:'People risks and implications',ph:'e.g. "8 critical AI/ML engineers — replacement cost $180K each, 6-month fill time. Culture drift post-Series B. 3 contracts to renegotiate."'},
+      {id:'scenarios',l:'Workforce planning scenarios',ph:'e.g. "Invest: attrition to 12%, on-track, cost +$4.2M. Status quo: attrition 25%, $6M revenue risk. Restructure: 20 roles, save $1.8M."'}
+    ]},
+    {s:'🏆 Board Decision and Output',fields:[
+      {id:'decision',l:'Board resolutions required',ph:'e.g. "Resolution 1: Approve people strategy and $4.2M investment. Resolution 2: Authorise APAC hiring. Resolution 3: Note attrition risk register."'},
+      {id:'output',l:'Board document format',opts:['People strategy board paper','Workforce risk register','Organisational design recommendation','CHRO investor presentation section','Culture & engagement plan','Remuneration committee proposal']}
+    ]}
+  ]
+};
+
+FD.en.ta={
+  g:[
+    {s:'🔍 The Role',fields:[
+      {id:'jobtitle',l:'Job title and department',ph:'e.g. "Customer Success Manager — SaaS team, reporting to VP of Sales"'},
+      {id:'must',l:'Must-have skills (needed Day 1)',ph:'e.g. "3+ years customer service, fluent English, Salesforce experience"'},
+      {id:'nice',l:'Nice-to-have skills',ph:'e.g. "Bonus: speaks Thai, SaaS background, has done live demos"'},
+      {id:'culture',l:'Company culture and vibe',ph:'e.g. "Fast-paced startup, independent, casual dress, collaborative"'}
+    ]},
+    {s:'⚙️ Process and Output',fields:[
+      {id:'package',l:'Salary and benefits',ph:'e.g. "Salary $2,000-$2,800/month. Health insurance, 15 days leave, WFH Fridays"'},
+      {id:'challenge',l:'What is making this hire hard?',ph:'e.g. "Good candidates get other offers before we can decide"'},
+      {id:'output',l:'What should I create?',opts:['Full job description','Interview questions','Candidate scorecard','LinkedIn outreach message','Offer letter template','Job board ad (short)']}
+    ]}
+  ],
+  m:[
+    {s:'🔍 Hiring Brief',fields:[
+      {id:'jobtitle',l:'Role title, level and reporting line',ph:'e.g. "Senior Data Engineer (IC4), Data Platform team, reports to Head of Data"'},
+      {id:'must',l:'Non-negotiable requirements',ph:'Must have:\n5+ years data engineering\nProficient in dbt + Spark + Airflow\nMedallion architecture experience\nProduction experience at >1TB scale\nExcellent written English',rows:5},
+      {id:'nice',l:'Preferred qualifications',ph:'Strong preference:\nHigh-growth SaaS experience\nOpen-source contributor\nData contracts experience\nPreviously led a small team',rows:4},
+      {id:'persona',l:'Ideal candidate profile and motivation',ph:'e.g. "Data engineer who has hit a ceiling at a bigger company, wants to own a platform from scratch, motivated by technical craft."'}
+    ]},
+    {s:'📊 Hiring Strategy',fields:[
+      {id:'package',l:'Compensation and benchmarking',ph:'e.g. "Base: 180-220K baht/month (P50-P75 Radford APAC). Equity: 0.05-0.08% (4yr vest, 1yr cliff). Bonus: 10% KPI-linked."'},
+      {id:'process',l:'Interview process and timeline',ph:'e.g. "Stage 1: 30-min recruiter. Stage 2: 60-min technical. Stage 3: 4hr take-home task. Stage 4: Head of Data + CTO. 3 weeks total."'},
+      {id:'sourcing',l:'Sourcing strategy',opts:['LinkedIn Recruiter (active sourcing)','Boolean search + InMail campaign','Internal referral (incentivised)','Specialist tech recruiters','Targeted job boards (Wellfound, Levels.fyi)','Community sourcing (Slack, GitHub, meetups)']},
+      {id:'challenge',l:'Hiring challenge and risk',ph:'e.g. "Market tight for dbt + Spark combination. 2 previous hires failed probation — insufficient data scale experience."'},
+      {id:'output',l:'Deliverable needed',opts:['Full job description (internal + external)','Structured interview guide (all stages)','Technical assessment brief','Candidate evaluation scorecard','Diversity hiring plan']}
+    ]}
+  ],
+  e:[
+    {s:'🏆 Executive Talent Strategy',fields:[
+      {id:'agenda',l:'Talent agenda item and business context',ph:'e.g. "Critical gap: Chief Revenue Officer — current VP Sales lacks enterprise experience. Blocking $8M enterprise target. Board involved."',rows:2},
+      {id:'role_scope',l:'Role scope, accountability and success profile',ph:'e.g. "CRO scope: owns $18M ARR target, leads 36-person GTM org. 18-month mandate: 5 enterprise logos >$500K, scalable process, VP succession."',rows:3},
+      {id:'market',l:'Executive talent market context',ph:'e.g. "CRO in APAC SaaS: thin market, ~120 qualified executives. Notice: 3-6 months. Compensation: base $280-400K + equity."'}
+    ]},
+    {s:'💼 Search and Assessment',fields:[
+      {id:'package',l:'Executive compensation package',ph:'e.g. "Base: $340K. STI: 50% base on ARR attainment. LTI: 0.4% equity (4yr vest, 1yr cliff). Relocation if needed."'},
+      {id:'process',l:'Executive search process and governance',ph:'e.g. "Search firm: Korn Ferry. Process: 8-10 candidates, 4-5 to interview. Panel: CEO, CFO, 2 board members. Target start: 90 days."'},
+      {id:'risk',l:'Key risks in this hire',ph:'e.g. "Time-to-fill >90 days — Q3 pipeline $3M unmanaged. Mitigation: interim CRO (board member). Cultural fit: 2 previous CROs left in 12 months."'}
+    ]},
+    {s:'🏆 Board Decision and Output',fields:[
+      {id:'decision',l:'Board decisions required',ph:'e.g. "1. Approve search budget ($180K). 2. Confirm compensation framework including equity. 3. Agree board interview panel."'},
+      {id:'output',l:'Board deliverable format',opts:['Executive search mandate brief','Board talent committee paper','Compensation benchmarking report','Succession planning update','Leadership assessment framework','Offer approval memo']}
+    ]}
+  ]
+};
+
+FD.en.teacher={
+  g:[
+    {s:'🎓 The Lesson',fields:[
+      {id:'subject',l:'Subject and exact topic',tip:'The more specific the better.',ph:'e.g. "Math — Adding fractions with different denominators (Grade 6)"'},
+      {id:'grade',l:'Student age or grade level',opts:['Young kids (Age 5-8)','Primary (Age 8-11)','Middle School (Age 11-14)','High School (Age 14-18)','University / College','Adults / Professional training']},
+      {id:'duration',l:'Lesson duration',opts:['15-20 min (quick activity)','30 min (half lesson)','45-50 min (standard class)','80-90 min (double period)','Half-day workshop','Full day / multi-day']},
+      {id:'objective',l:'Learning goal',tip:'Finish this: "By the end, students can ___"',ph:'e.g. "Correctly add fractions like 1/3 + 1/4 and explain why the answer makes sense"'}
+    ]},
+    {s:'⚙️ Teaching Details',fields:[
+      {id:'method',l:'How do you like to teach?',opts:['Teacher explains + students practice','Group activities & teamwork','Discovery / experiments','Videos + discussion','Games & competitions','Real-world projects','Online / blended']},
+      {id:'struggles',l:'What do students usually get wrong?',ph:'e.g. "They forget to find common denominator and just add top and bottom numbers"'},
+      {id:'resources',l:'Resources you have',ph:'e.g. "Whiteboard, worksheets, tablets (1 per 2 students)"'},
+      {id:'output',l:'What should I create?',opts:['Full lesson plan','Student worksheet','Quiz + answer key','Slide outline','Fun game / activity','Letter to parents']}
+    ]}
+  ],
+  m:[
+    {s:'📚 Curriculum Design Brief',fields:[
+      {id:'subject',l:'Subject, curriculum framework and unit',ph:'e.g. "Mathematics — Thai Basic Education Core Curriculum 2551, Grade 6, Unit 3: Fractions (12-lesson sequence)"'},
+      {id:'grade',l:'Student cohort and context',ph:'e.g. "Grade 6, 4 classes of 30 students. Mixed ability. 15% ELL students. Private bilingual school, Bangkok."'},
+      {id:'objective',l:"Learning objectives (Bloom's levels)",ph:"Knowledge: Identify equivalent fractions\nComprehension: Explain why denominators must match\nApplication: Solve 20-item mixed problem set\nAnalysis: Identify error patterns in peer work\nSynthesis: Create own word problems\nEvaluation: Justify solution method choice",rows:6},
+      {id:'duration',l:'Unit duration and lesson structure',ph:'e.g. "12 lessons x 50 min over 4 weeks. 3 concept intro, 4 guided practice, 3 independent, 2 assessment."'}
+    ]},
+    {s:'📊 Pedagogy and Differentiation',fields:[
+      {id:'method',l:'Pedagogical approach',ph:'e.g. "Concrete-Pictorial-Abstract (CPA). Mastery learning — 80% mastery before moving on. Collaborative pairs + small group rotation."'},
+      {id:'differentiation',l:'Differentiation strategy',ph:'Support: manipulatives + fraction strips + worked examples\nCore: mixed practice with scaffolded problems\nExtension: open-ended investigation + cross-curricular\nELL: visual vocabulary wall + bilingual glossary',rows:4},
+      {id:'assessment',l:'Assessment strategy',ph:'e.g. "Formative: exit tickets every 2 lessons, hinge questions. Summative: 40-item unit test (50% fluency, 50% reasoning). Mastery: 80%."'},
+      {id:'output',l:'Curriculum deliverable needed',opts:['Full unit plan (all lessons)','Differentiated resources (3 levels)','Assessment suite (formative + summative)','Teacher guide with pedagogical notes','Student workbook (print-ready)','Parent curriculum letter']}
+    ]}
+  ],
+  e:[
+    {s:'🏫 Educational Strategy and Policy',fields:[
+      {id:'agenda',l:'Educational leadership agenda item',ph:'e.g. "Board Agenda: Adoption of mastery mathematics programme across K-12 (600 students) — replacing current scheme to address 3-year PISA/O-NET decline"',rows:2},
+      {id:'context',l:'School performance context',ph:"National O-NET Math Grade 6: 38.2% (national avg 42.1%)\nInternal: 31% of Grade 6 below grade level\nTeacher confidence (survey): 58% confident in math (down 14pts)\nParent satisfaction math: 62% (down 8pts YoY)\nComparator school: 71%",rows:5},
+      {id:'strategic_link',l:'Strategic and regulatory context',ph:'e.g. "Linked to OBEC school improvement mandate. Board KPI: O-NET +8pts over 3 years. Accreditation visit in 18 months."'}
+    ]},
+    {s:'💰 Programme Investment and Implementation',fields:[
+      {id:'investment',l:'Programme investment and resources',ph:'e.g. "Mastery Maths licence 3yr: $45K. Teacher CPD: $18K Year 1, $9K Year 2-3. Materials: $12K. Total 3yr: $99K vs current $31K."'},
+      {id:'implementation',l:'Implementation strategy',ph:'e.g. "Year 1: Pilot Grade 4-6 (3 teachers, 90 students). Year 2: K-6 (12 teachers, 360 students). Year 3: K-12 (24 teachers, 600 students)."'},
+      {id:'risk',l:'Implementation risks and mitigations',ph:'e.g. "Teacher resistance: co-design not top-down. Parent confusion: workshop series. Results lag 18-24 months: interim termly metrics."'}
+    ]},
+    {s:'🏆 Board Decision and Output',fields:[
+      {id:'decision',l:'Board resolutions required',ph:'e.g. "Resolution 1: Approve mastery maths programme and $99K 3-year investment. Resolution 2: Authorise Head of School to select provider."'},
+      {id:'output',l:'Board document format',opts:['School improvement board paper','Curriculum change proposal','Evidence review & programme comparison','Implementation & risk plan','Staff consultation report','Parent communication strategy']}
+    ]}
+  ]
+};
+
+FD.en.influencer={
+  g:[
+    {s:'🌟 Your Content',fields:[
+      {id:'niche',l:'Content niche',opts:['Lifestyle & daily life','Fashion & beauty','Food & cooking','Travel & adventure','Money & finance','Fitness & health','Tech & gadgets','Parenting & family','Business & career','Gaming','Sustainability','Mental health']},
+      {id:'platform',l:'Platform',opts:['Instagram Feed','Instagram Reel/Story','TikTok','YouTube','YouTube Shorts','Facebook','X / Twitter','LinkedIn','Blog / Newsletter','Podcast']},
+      {id:'followers',l:'Your audience',tip:'Who follows you? Size + profile.',ph:'e.g. "45K followers, Thai women 20-30, love budget travel"'},
+      {id:'thispost',l:'This post is about',ph:'e.g. "Just back from Chiang Mai, 3 days, under 3,000 baht total"',rows:2}
+    ]},
+    {s:'⚙️ Style and Output',fields:[
+      {id:'feeling',l:'Feeling to create',opts:['Inspired to do same','Entertained / laughing','Learned something','FOMO!','Trust me more','Want what I am using']},
+      {id:'collab',l:'Paid partnership? (if any)',ph:'e.g. "AirAsia — mention Bangkok to Chiang Mai route, keep it natural"'},
+      {id:'cta',l:'What should followers do?',ph:'e.g. "Save this post for their next trip"'},
+      {id:'output',l:'What do you need?',opts:['Caption + hashtags (ready to post)','Video script','30-day content calendar','Brand pitch email','Bio rewrite','Reel / Story storyboard']}
+    ]}
+  ],
+  m:[
+    {s:'🌟 Content Strategy Brief',fields:[
+      {id:'niche',l:'Content pillar and niche positioning',ph:'e.g. "Travel finance niche: The luxury minimalist — showing how to travel business class for less. Differentiation: points hacking + deep destination guides."'},
+      {id:'platform',l:'Primary channel and content format',ph:'e.g. "Primary: YouTube (long-form 12-18 min). Secondary: Instagram Reels (60s). Newsletter (weekly, 8K subscribers)."'},
+      {id:'audience',l:'Audience persona and data insights',ph:'e.g. "Core: Thai professionals 27-38, HHI 80K+ baht/month, 2-3 intl trips/year. Pain: want premium travel but feel they cannot afford it."'},
+      {id:'content_goal',l:'This content strategic goal',opts:['Audience growth (reach new viewers)','Engagement depth (comments, saves, watch time)','Monetisation (sales, affiliate, brand deal)','Authority building','Algorithm / SEO growth','Community building']}
+    ]},
+    {s:'📊 Content Production and Brand',fields:[
+      {id:'thispost',l:'Content concept and narrative',tip:'Hook, story, payoff.',ph:"Hook: 'I flew business class to Tokyo for 4,200 baht — here is exactly how.'\nStory: Points strategy, booking timing, lounge experience.\nPayoff: 5-step checklist viewers can start this week.",rows:4},
+      {id:'collab',l:'Brand partnership details',ph:'e.g. "AMEX Platinum — 3 x Instagram Reels + 1 YouTube integration (2 min). Key: lounge + 5x points. Must include #AmexPartner. Due: Oct 15."'},
+      {id:'kpi',l:'Success metrics',ph:'e.g. "YouTube: 50K views, 65% retention. Instagram: 200K reach, 6% engagement. Affiliate: 150 card applications via link."'},
+      {id:'output',l:'Content deliverable needed',opts:['Full YouTube script (with timestamps)','Video storyboard + shot list','Instagram carousel copy (10 slides)','Caption suite (adapted per platform)','Content series plan (4-8 pieces)']}
+    ]}
+  ],
+  e:[
+    {s:'🏆 Creator Business Strategy',fields:[
+      {id:'business_context',l:'Creator business overview',ph:'Creator revenues:\nBrand deals: 4.2M baht (60%)\nAffiliate: 980K baht (14%)\nDigital products: 700K baht (10%)\nSpeaking / events: 560K baht (8%)\nCourse / membership: 560K baht (8%)\nTotal: 7M baht | Target: 12M baht',rows:6},
+      {id:'brand_strategy',l:'Personal brand strategy and positioning',ph:'e.g. "Repositioning from budget travel tips to smart travel for ambitious professionals — moving upmarket to attract premium brand partners and launch membership."',rows:3},
+      {id:'market',l:'Creator market context and competitive position',ph:'e.g. "Thai travel creator market: ~200 monetised accounts. Top 20 earn >3M baht/year. My position: #6 by revenue, #3 by engagement. Competitor raised 15M baht from media group Q1."'}
+    ]},
+    {s:'💰 Revenue and Partnership Strategy',fields:[
+      {id:'deals',l:'Brand partnership strategy and rate card',ph:'e.g. "Rates: YouTube integration 280K baht. Instagram Reel 85K baht. Newsletter feature 45K baht. Target: +40% YoY by anchoring to guaranteed 50K views."'},
+      {id:'product',l:'Owned product and community strategy',ph:'e.g. "Launching: Points Insider membership — 2,999 baht/month, target 500 members = 17.9M baht/year recurring. Product: weekly deal alerts + community + live Q&A."'},
+      {id:'risk',l:'Business risks and strategic decisions needed',ph:'e.g. "Risk 1: Brand deals 60% of revenue — one brand paused Q3 = 1.2M baht gap. Risk 2: YouTube 70% of reach — diversification needed. Risk 3: Currently solo."'}
+    ]},
+    {s:'🏆 Strategic Output',fields:[
+      {id:'decision',l:'Key strategic decisions facing the business',ph:'e.g. "Decision 1: Accept 8M baht media company acquisition (50% stake). Decision 2: Hire first employee. Decision 3: Course vs membership vs both."'},
+      {id:'output',l:'Strategic document needed',opts:['Creator business strategy plan (1-year)','Brand partnership media kit & rate card','Revenue diversification roadmap','Creator-to-media company transition plan','Investor / partner pitch deck']}
+    ]}
+  ]
+};
+
+// ════════════════════════════════════════════════════════════════
+// THAI FIELDS — all labels, tips, placeholders and options in Thai
+// ════════════════════════════════════════════════════════════════
+FD.th.content={
+  g:[
+    {s:'📝 เนื้อหาที่จะเขียน',fields:[
+      {id:'topic',l:'อยากเขียนเรื่องอะไร?',tip:'บอกเป็นคำง่ายๆ ไม่ต้องซับซ้อน',ph:'เช่น "5 เคล็ดลับนอนหลับดีขึ้น" หรือ "วิธีที่ฉันประหยัดเงินทุกเดือน"'},
+      {id:'audience',l:'ใครจะเป็นคนอ่าน?',tip:'นึกภาพคน 1 คนที่จะมาอ่าน — อายุ งาน ปัญหาของเขา',ph:'เช่น "แม่บ้านที่ต้องการไอเดียอาหารสุขภาพทำเร็ว"'},
+      {id:'format',l:'รูปแบบคอนเทนต์',opts:['บล็อก / เรื่องเล่า','รายการขั้นตอน','ถาม-ตอบ','บทความแสดงความคิดเห็น','Newsletter','Thread โซเชียล']},
+      {id:'tone',l:'โทนเสียงที่ต้องการ',opts:['เป็นกันเอง / สบายๆ','สร้างแรงบันดาลใจ','ให้ข้อมูลชัดเจน','ตลก','มืออาชีพ','เล่าเรื่อง']},
+      {id:'length',l:'ความยาวที่ต้องการ',opts:['ต่ำกว่า 300 คำ','300-600 คำ','600-1000 คำ','1000-2000 คำ']}
+    ]},
+    {s:'⚙️ รายละเอียดเพิ่มเติม',fields:[
+      {id:'cta',l:'อยากให้ผู้อ่านทำอะไรหลังอ่านจบ?',tip:'ติดตาม? ซื้อ? แชร์?',ph:'เช่น "กด Follow เพจ" หรือ "โหลดคู่มือฟรี"'},
+      {id:'avoid',l:'สิ่งที่ไม่ต้องการในเนื้อหา',ph:'เช่น "ห้ามใช้ศัพท์เทคนิค ไม่เอาเรื่องการเมือง"'}
+    ]}
+  ],
+  m:[
+    {s:'📝 Content Brief',fields:[
+      {id:'topic',l:'หัวข้อและ Working Title',tip:'ยิ่งละเอียดยิ่งดี',ph:'เช่น "คู่มือ 2025: ทีม Remote ทำงานโปรดักทีฟได้อย่างไรโดยไม่ต้อง Micromanage"'},
+      {id:'objective',l:'วัตถุประสงค์ทางธุรกิจ',tip:'ทำไมบริษัทถึงต้องการ Content ชิ้นนี้?',ph:'เช่น "สร้าง Lead ให้ HR Software โดยเป้าหมายคือ HR Manager"'},
+      {id:'audience',l:'กลุ่มเป้าหมายที่ชัดเจน',ph:'เช่น "HR Manager บริษัท 50-200 คน มีปัญหาติดตามงาน WFH"'},
+      {id:'format',l:'รูปแบบและโครงสร้าง',opts:['Long-form Guide','Listicle (รายการข้อ)','Case Study','Thought Leadership','Email Series','Pillar Page']},
+      {id:'tone',l:'Brand Voice และโทนเสียง',opts:['Authority & Expert','อบอุ่น & เข้าถึงง่าย','Bold & Challenger','Data-driven','สนทนา & เข้าใจง่าย']}
+    ]},
+    {s:'📊 กลยุทธ์และผลลัพธ์',fields:[
+      {id:'keywords',l:'Target SEO Keywords',ph:'เช่น "ผลิตภาพทีม Remote (primary), เครื่องมือ WFH (secondary)"'},
+      {id:'funnel',l:'Funnel Stage',opts:['Awareness (ยังไม่รู้ปัญหา)','Consideration (กำลังหาทางออก)','Decision (พร้อมซื้อ)','Retention (ลูกค้าเดิม)']},
+      {id:'cta',l:'Conversion Action ที่ต้องการ',ph:'เช่น "จอง Demo ฟรี" หรือ "ดาวน์โหลด Playbook"'},
+      {id:'kpi',l:'วัดความสำเร็จอย่างไร?',ph:'เช่น "500 organic visits/เดือน ใน 6 เดือน 50 demo requests"'},
+      {id:'avoid',l:'ข้อจำกัด Brand/กฎหมาย',ph:'เช่น "ห้ามกล่าวถึงชื่อคู่แข่ง ห้ามอ้าง ROI โดยไม่มีแหล่งข้อมูล"'}
+    ]}
+  ],
+  e:[
+    {s:'🎯 Strategic Content Brief',fields:[
+      {id:'topic',l:'Content Initiative และ Theme เชิงกลยุทธ์',ph:'เช่น "Executive Perspective: ต้นทุนที่ซ่อนอยู่ของ Employee Wellbeing ที่ไม่ดี"'},
+      {id:'business_goal',l:'Business Outcome ที่ Content นี้สนับสนุน',ph:'เช่น "สนับสนุน Narrative การระดมทุน Series B โดยสร้าง CEO เป็น Authority ด้าน Future of Work"'},
+      {id:'audience',l:'กลุ่มเป้าหมายหลักและรอง',ph:'เช่น "หลัก: CHRO/CEO Enterprise / รอง: นักลงทุน บอร์ด สื่อ"'}
+    ]},
+    {s:'📣 Positioning และ Narrative',fields:[
+      {id:'positioning',l:'Thought Leadership Angle',ph:'เช่น "บริษัทที่ลงทุนด้าน Wellbeing มีผลงานเหนือคู่แข่ง 21% — งานวิจัยของเรา"'},
+      {id:'narrative',l:'Core Narrative Arc',ph:'เช่น "เปิด: ผู้บริหารส่วนใหญ่คิดว่า Wellbeing เป็นเรื่อง HR / ปิด: มันคือ CFO Risk อันดับ 1"'},
+      {id:'evidence',l:'Data และ Proof Points ที่ต้องใส่',ph:'เช่น "Workforce Report 2025: 68% ของ CHRO Fortune 500 ระบุ Burnout เป็น Top Retention Risk"'}
+    ]},
+    {s:'📊 การเผยแพร่และ KPIs',fields:[
+      {id:'distribution',l:'แผนการเผยแพร่',opts:['Press Release + Media Outreach','CEO LinkedIn + Paid Amplification','Investor Relations Chapter','Conference Keynote Material','Integrated Campaign']},
+      {id:'kpi',l:'Success Metrics ระดับ Executive',ph:'เช่น "Media Pickup 3 สำนัก 10K LinkedIn Impressions อ้างอิงใน 2 Investor Conversations"'},
+      {id:'tone',l:'Voice และ Positioning',opts:['Visionary & Bold','Data-driven & Analytical','Empathetic & Human-first','Challenger & Provocative']}
+    ]}
+  ]
+};
+
+FD.th.review={
+  g:[
+    {s:'🛍 ข้อมูลสินค้า',fields:[
+      {id:'product',l:'ชื่อสินค้าหรือบริการ',tip:'ชื่อเต็มรวมชื่อแบรนด์',ph:'เช่น "Dyson V15 เครื่องดูดฝุ่น"'},
+      {id:'category',l:'ประเภทสินค้า',opts:['อิเล็กทรอนิกส์','สกินแคร์และความงาม','อาหารและเครื่องดื่ม','แฟชั่น','ของตกแต่งบ้าน','สุขภาพและฟิตเนส','แอปหรือซอฟต์แวร์','บริการ']},
+      {id:'price',l:'ราคา',ph:'เช่น "1,500 บาท"'},
+      {id:'usage',l:'ใช้มานานแค่ไหน?',ph:'เช่น "ใช้ทุกวัน 2 เดือน"'}
+    ]},
+    {s:'⭐ ประสบการณ์ของคุณ',fields:[
+      {id:'pros',l:'สิ่งที่ชอบมาก (แต่ละข้อขึ้นบรรทัดใหม่)',ph:'แบตอยู่ได้ทั้งวัน\nหน้าจอสว่างแม้แสงแดด\nตั้งค่าง่าย 5 นาที',rows:3},
+      {id:'cons',l:'สิ่งที่ไม่ชอบ (แต่ละข้อขึ้นบรรทัดใหม่)',ph:'เคสขีดข่วนง่าย\nไม่มีที่ชาร์จในกล่อง',rows:3},
+      {id:'rating',l:'คะแนนที่ให้',opts:['1/5 - แย่มาก','2/5 - น่าผิดหวัง','3/5 - พอใช้ได้','4/5 - ดีมาก','5/5 - เยี่ยมมาก!']},
+      {id:'verdict',l:'สรุปแนะนำไหม?',opts:['ซื้อเลย! 100%','แนะนำ — รอลดราคาก่อน','อาจจะ — ขึ้นอยู่กับงบ','ไม่แนะนำ — มีตัวเลือกที่ดีกว่า','ไม่แนะนำ — เสียเงินเปล่า']}
+    ]}
+  ],
+  m:[
+    {s:'🛍 การประเมินสินค้า',fields:[
+      {id:'product',l:'สินค้า บริการ และ Vendor',ph:'เช่น "Salesforce Sales Cloud — Enterprise Plan (300 seats)"'},
+      {id:'category',l:'ประเภทสินค้า',opts:['B2B Software / SaaS','Hardware / Equipment','Professional Service','Enterprise Platform','API / Integration','สินค้าฟิสิคัล']},
+      {id:'price',l:'ต้นทุนรวมและรูปแบบการคิดเงิน',ph:'เช่น "$2,400/ปี ต่อ seat + ค่า Implementation $15K"'},
+      {id:'context',l:'บริบทธุรกิจ — ทำไมถึงประเมิน?',ph:'เช่น "ประเมินเพื่อแทน HubSpot ตอนทีมโตเกิน 100 คน"'}
+    ]},
+    {s:'📊 การประเมิน',fields:[
+      {id:'pros',l:'จุดแข็ง — อะไรที่ใช้งานได้ดี',ph:'Native Integration ประหยัด 8 ชม./สัปดาห์\nDashboard ทุก Manager เห็น Real-time',rows:3},
+      {id:'cons',l:'จุดอ่อนและช่องว่าง',ph:'Onboarding ใช้ 6 สัปดาห์แทนที่สัญญา 2 สัปดาห์\nแอปมือถือใช้งานไม่ได้สำหรับ Field Reps',rows:3},
+      {id:'compare',l:'ทางเลือกที่ประเมินเปรียบเทียบ',ph:'เช่น "HubSpot: UX ดีกว่า ปรับแต่งน้อยกว่า / Dynamics: ถูกกว่า Support อ่อนกว่า"'},
+      {id:'roi',l:'ผลกระทบทางธุรกิจและ ROI',ph:'เช่น "Pipeline visibility ดีขึ้น 15% Sales cycle ลดจาก 45 เป็น 38 วัน"'},
+      {id:'verdict',l:'คำแนะนำของทีม',opts:['แนะนำอย่างยิ่ง — ต่อสัญญา','แนะนำแต่มีเงื่อนไข','เป็นกลาง — ต้องปรับปรุงก่อน','ไม่แนะนำ']}
+    ]}
+  ],
+  e:[
+    {s:'🏢 Vendor Strategic Assessment',fields:[
+      {id:'product',l:'Vendor สินค้า และขอบเขตสัญญา',ph:'เช่น "Oracle ERP Cloud — สัญญา 3 ปี $2.4M TCV 800 users"'},
+      {id:'strategic_fit',l:'การประเมิน Strategic Fit',ph:'เช่น "สำคัญต่อโครงการ ERP Consolidation แทน 4 Legacy Systems ภายใน Q3"'},
+      {id:'risk',l:'Vendor Risk Profile',ph:'เช่น "Single-source risk: 60% ของ AP Processing SOC2 Type II certified"'}
+    ]},
+    {s:'📊 ผลกระทบทางการเงิน',fields:[
+      {id:'tco',l:'Total Cost of Ownership (3 ปี)',ph:'เช่น "ปี 1: $1.8M ปี 2-3: $600K/ปี TCO 3 ปี: $3M"'},
+      {id:'roi',l:'Business Value และ ROI ที่วัดได้',ph:'เช่น "ลดพนักงานการเงิน 22% ประหยัด $1.4M/ปี Payback: 26 เดือน"'},
+      {id:'risks_ops',l:'ความเสี่ยง Operations และการลดความเสี่ยง',ph:'เช่น "Migration Risk: Parallel Run 60 วัน Exit Clause หลัง Year 1"'}
+    ]},
+    {s:'🏆 Board Recommendation',fields:[
+      {id:'verdict',l:'คำแนะนำระดับ Executive',opts:['อนุมัติ — ดำเนินการ Full Deployment','อนุมัติแบบมีเงื่อนไข','Hold — รอ Vendor แก้ไขก่อน','ปฏิเสธ — Re-tender ใหม่']},
+      {id:'next_steps',l:'Next Steps และ Timeline',ph:'เช่น "บอร์ดอนุมัติ 15 ต.ค. T&C 30 ต.ค. Go-live 1 ม.ค."'},
+      {id:'output',l:'รูปแบบรายงานที่ต้องการ',opts:['Board Paper (1 หน้า)','Vendor Evaluation Report','Investment Committee Memo','Procurement Scorecard']}
+    ]}
+  ]
+};
+
+FD.th.caption={
+  g:[
+    {s:'📸 รายละเอียดโพสต์',fields:[
+      {id:'platform',l:'แพลตฟอร์มที่จะโพสต์',opts:['Instagram Feed','Instagram Reel/Story','Facebook','TikTok','LinkedIn','X / Twitter','Threads','Pinterest']},
+      {id:'visual',l:'อธิบายรูปหรือวิดีโอ',tip:'AI ไม่เห็นภาพ ต้องบอกให้ชัดเจน',ph:'เช่น "รูปฉันที่คาเฟ่ ถือกาแฟ บรรยากาศโคสี ใส่สเวตเตอร์เบจ"'},
+      {id:'goal',l:'ทำไมถึงโพสต์นี้?',opts:['ได้ Likes & Comments เยอะ','โปรโมทสินค้า','แชร์เรื่องส่วนตัว','เพิ่มผู้ติดตาม','นำคนไปเว็บไซต์']},
+      {id:'mood',l:'อยากให้คนรู้สึกอะไร?',opts:['มีความสุข & เป็นบวก','ถูกจุดไฟ','อยากรู้มากขึ้น','ตลก','ได้แรงบันดาลใจ','FOMO']}
+    ]},
+    {s:'✍️ สไตล์แคปชั่น',fields:[
+      {id:'brand',l:'สไตล์การโพสต์ของคุณ',ph:'เช่น "ใช้ภาษาสบายๆ ใส่ Emoji เยอะ เป็นกันเอง"'},
+      {id:'hashtags',l:'ต้องการ Hashtag แบบไหน?',opts:['3-5 อัน เฉพาะเจาะจง','10-15 อัน ผสม','20-30 อัน Reach สูงสุด','ไม่ต้องการ']},
+      {id:'cta',l:'อยากให้คนทำอะไร?',ph:'เช่น "แท็กเพื่อน!" หรือ "คอมเมนต์ด้านล่าง"'},
+      {id:'variants',l:'ต้องการกี่เวอร์ชัน?',opts:['แค่ 1','2 ตัวเลือก','3 สไตล์ (สั้น/กลาง/ยาว)']}
+    ]}
+  ],
+  m:[
+    {s:'📸 Content Brief',fields:[
+      {id:'platform',l:'แพลตฟอร์มและ Placement',opts:['Instagram Feed — Organic','Instagram Reel — Reach Campaign','Facebook Page Post','LinkedIn Company Page','TikTok Brand Account','Multi-platform']},
+      {id:'visual',l:'Creative Description',ph:'เช่น "Product Hero Shot — Midnight Blue บน Background คอนกรีต Studio Lit"'},
+      {id:'campaign',l:'Campaign ที่โพสต์นี้อยู่',ph:'เช่น "Q4 Holiday — Gift Yourself Theme โพสต์ที่ 3 จาก 6"'},
+      {id:'audience',l:'Target Segment สำหรับโพสต์นี้',ph:'เช่น "ผู้หญิง Millennial 25-34 Urban รายได้สูง Fashion-forward"'}
+    ]},
+    {s:'📊 กลยุทธ์และ Copy',fields:[
+      {id:'goal',l:'KPI และเป้าหมายทางธุรกิจ',opts:['Engagement Rate (Likes Comments)','Click-through Product Page','Story Swipe-up Conversion','Save Rate','Reach & Impressions']},
+      {id:'message',l:'Core Message และจุดขายหลัก',ph:'เช่น "กระเป๋าใบเดียวที่ไม่ต้องซื้อใหม่ — ทนต่อเทรนด์"'},
+      {id:'tone',l:'Brand Voice สำหรับโพสต์นี้',opts:['Premium & Aspirational','Bold & Challenger','Warm & Community','Educational','Playful & Viral']},
+      {id:'hashtags',l:'Hashtag Strategy',opts:['Brand Hashtag เท่านั้น','Niche Community (5-10)','Mixed Brand + Trending (15-25)','Paid Post — ไม่ใส่']},
+      {id:'cta',l:'Primary CTA',ph:'เช่น "Shop ที่ Link in Bio" หรือ "Save ไว้ใน Wish List"'},
+      {id:'variants',l:'Copy Variants ที่ต้องการ',opts:['1 เวอร์ชันที่อนุมัติแล้ว','2 สำหรับ A/B Test','3 ปรับตาม Platform (IG/FB/LinkedIn)']}
+    ]}
+  ],
+  e:[
+    {s:'🎯 Brand Communication Strategy',fields:[
+      {id:'platform',l:'Channel Mix และ Content Pillar',ph:'เช่น "Instagram + LinkedIn + Paid Dark Posts — Campaign Lead Boldly"'},
+      {id:'brand_position',l:'Brand Positioning ที่ Content นี้เสริมสร้าง',ph:'เช่น "Innovation Leader — เปรียบเทียบกับ Legacy Competitors ที่ไม่ได้พัฒนาตั้งแต่ 2010"'},
+      {id:'audience',l:'Priority Audience และ Personas',ph:'เช่น "CFO 45-60: ปัจจุบันเชื่อว่า Category ของเราคือ Cost Centre เป้าหมาย: ให้เห็นเป็น Growth Lever"'}
+    ]},
+    {s:'📣 Campaign Architecture',fields:[
+      {id:'campaign',l:'ชื่อ Theme และฤดูกาลของ Campaign',ph:'เช่น "FY25 Q1: The Decisive Edge — เป้าหมาย C-suite ม.ค.-มี.ค."'},
+      {id:'message',l:'Master Message และ Proof Points',ph:'เช่น "Master: เราทำให้ผู้นำตัดสินใจได้เด็ดขาด Proof: เร็วขึ้น 40% ROI 3x 200 Fortune 500 users"'},
+      {id:'narrative',l:'Narrative Arc ของ Campaign',ph:'เช่น "สัปดาห์ 1: ปัญหา สัปดาห์ 2: Solution สัปดาห์ 3: Social Proof สัปดาห์ 4: CTA"'}
+    ]},
+    {s:'📊 Measurement และ Governance',fields:[
+      {id:'kpi',l:'Campaign KPIs และ Attribution Model',ph:'เช่น "2M Impressions Engagement 3%+ 500 Qualified Leads UTM Attribution"'},
+      {id:'compliance',l:'กฎหมาย Compliance และ Brand Governance',ph:'เช่น "ต้องใส่ Disclosure ใน Paid Posts ห้าม Performance Claims โดยไม่อ้างแหล่งข้อมูล"'},
+      {id:'output',l:'Deliverables ที่ต้องการ',opts:['Caption Suite เต็มรูปแบบ (10 โพสต์)','Campaign Messaging Framework','Copy + Visual Direction Brief','Multi-platform Adaptation Guide']}
+    ]}
+  ]
+};
+
+FD.th.lawyer={
+  g:[
+    {s:'⚖️ สถานการณ์ของคุณ',fields:[
+      {id:'area',l:'เรื่องนี้เกี่ยวกับกฎหมายด้านไหน?',opts:['สัญญา (ข้อตกลง)','แรงงาน / การทำงาน','ธุรกิจ / บริษัท','ลิขสิทธิ์และทรัพย์สินทางปัญญา','อาญา','อสังหาริมทรัพย์','กฎหมายครอบครัว','การฟ้องร้อง / คดีความ']},
+      {id:'task',l:'คุณต้องการอะไร? (ภาษาง่ายๆ)',tip:'บอกเหมือนเล่าให้เพื่อนที่เป็นทนายฟัง',ph:'เช่น "ฉันจ้างฟรีแลนซ์ จ่ายเงินไปแล้ว แต่เขาหายไปเฉยๆ อยากได้จดหมายเรียกร้องเงินคืน"',rows:3},
+      {id:'parties',l:'ใครเกี่ยวข้องบ้าง?',ph:'เช่น "ฉัน: นายสมชาย (ลูกค้า) / พวกเขา: บริษัท ABC ออกแบบ"'},
+      {id:'country',l:'เกิดขึ้นที่ไหน?',ph:'เช่น "ประเทศไทย" หรือ "แคลิฟอร์เนีย สหรัฐอเมริกา"'}
+    ]},
+    {s:'📋 รายละเอียดและเป้าหมาย',fields:[
+      {id:'dates',l:'วันสำคัญที่เกิดขึ้น',ph:'เช่น "เซ็นสัญญา 5 ม.ค. / จ่ายเงิน 10 ก.พ. / หายไป 1 มี.ค."'},
+      {id:'evidence',l:'หลักฐานที่มี',ph:'เช่น "สกรีนช็อต WhatsApp สัญญา PDF สลิปโอนเงิน"'},
+      {id:'goal',l:'ผลลัพธ์ที่ต้องการ',ph:'เช่น "เงิน 60,000 บาทคืน" หรือ "ให้หยุดใช้โลโก้ของฉัน"'},
+      {id:'output',l:'ต้องการให้เขียนอะไร?',opts:['จดหมายเรียกร้อง','ร่างสัญญา','อธิบายสิทธิ์กฎหมายภาษาง่ายๆ','วิเคราะห์ความเสี่ยง','บันทึกทางกฎหมายฉบับเต็ม']}
+    ]}
+  ],
+  m:[
+    {s:'⚖️ Legal Matter Overview',fields:[
+      {id:'area',l:'สาขากฎหมายและ Sub-matter',opts:['สัญญาพาณิชย์และข้อพิพาท','กฎหมายแรงงาน','Corporate / M&A / Governance','ทรัพย์สินทางปัญญา','PDPA / GDPR','Regulatory & Compliance','อสังหาริมทรัพย์','Litigation & Arbitration']},
+      {id:'task',l:'Legal Instruction และสรุป Matter',ph:'เช่น "Review และ Redline MSA กับ SaaS Vendor ใหม่จาก US บริษัทเป็น Data Controller ภายใต้ PDPA"',rows:3},
+      {id:'parties',l:'คู่สัญญาและบทบาท',ph:'เช่น "บริษัทเรา (Thai entity ผู้ซื้อ) / Vendor: Acme Inc. (Delaware ผู้ขาย)"'},
+      {id:'jurisdiction',l:'กฎหมายที่บังคับใช้และเขตอำนาจ',ph:'เช่น "กฎหมายไทย ข้อพิพาท: ICC Arbitration Singapore"'}
+    ]},
+    {s:'📊 ความเสี่ยงและ Deliverables',fields:[
+      {id:'key_issues',l:'ประเด็นกฎหมายสำคัญที่ต้องจัดการ',ph:'Liability Cap: เจรจาจาก 1x เป็น 3x\nData Residency: ต้องอยู่ใน TH หรือ SG เท่านั้น\nIP Ownership: Dev ทั้งหมด Assign ให้เรา\nTermination: ต้องการ 30 วัน',rows:4},
+      {id:'constraints',l:'ข้อจำกัดธุรกิจและ Non-negotiables',ph:'เช่น "ไม่สามารถตกลงกฎหมาย US ได้ ต้องการ Internal-ready Redline"'},
+      {id:'risk',l:'ระดับความเสี่ยง',opts:['ต่ำ — Manager อนุมัติ','กลาง — Legal Team Review','สูง — GC Sign-off','วิกฤต — บอร์ดรับทราบ']},
+      {id:'output',l:'Deliverable ที่ต้องการ',opts:['Redlined Contract พร้อม Comments','Legal Risk Matrix','Executive Summary สำหรับ Non-lawyers','Negotiation Position Paper','Full Legal Opinion']}
+    ]}
+  ],
+  e:[
+    {s:'⚖️ Board-Level Legal Matter',fields:[
+      {id:'area',l:'Legal Domain และบริบทเชิงกลยุทธ์',ph:'เช่น "M&A Due Diligence: ซื้อกิจการ FinCo (ไทย) $45M ต้องได้ BOT Approval"',rows:2},
+      {id:'task',l:'Board-level Legal Question',ph:'เช่น "บอร์ดต้องพิจารณา: (1) Maximum Liability Exposure (2) Go/No-go Criteria (3) Disclosure Obligations"',rows:3},
+      {id:'jurisdiction',l:'Jurisdictions และหน่วยงานกำกับดูแล',ph:'เช่น "ไทย (SEC BOT) สิงคโปร์ (MAS) กฎหมายไทยหลัก Singapore Arbitration"'}
+    ]},
+    {s:'📊 ความเสี่ยงและ Exposure',fields:[
+      {id:'exposure',l:'Maximum Financial & Reputational Exposure',ph:'เช่น "Worst Case: $12M Liability + ค่าปรับ 5% Revenue + ความเสี่ยงเพิกถอน Licence"'},
+      {id:'precedent',l:'Precedent และสภาพแวดล้อมกำกับดูแล',ph:'เช่น "SEC เข้มงวด M&A Disclosure Q1 2025 คู่แข่งโดนปรับ $8M ข้อหาเดียวกัน"'},
+      {id:'stakeholders',l:'ผู้มีส่วนได้เสียสำคัญ',ph:'เช่น "ภายใน: Board CFO Audit Committee / ภายนอก: Baker McKenzie Big 4 Forensics"'}
+    ]},
+    {s:'🏆 Board Output ที่ต้องการ',fields:[
+      {id:'decision',l:'การตัดสินใจที่บอร์ดต้องทำ',ph:'เช่น "Resolution 1: อนุมัติธุรกรรม Resolution 2: มอบอำนาจ CEO ดำเนินการ"'},
+      {id:'output',l:'รูปแบบ Board Document',opts:['Board Paper พร้อม Legal Opinion','Risk Register Update','Regulatory Submission Draft','Shareholder Circular','Settlement Authority Memo']},
+      {id:'timeline',l:'Timeline การตัดสินใจ',ph:'เช่น "บอร์ด 20 ต.ค. ยื่น Regulatory 1 พ.ย. Long-stop 31 ธ.ค."'}
+    ]}
+  ]
+};
+
+FD.th.engineer={
+  g:[
+    {s:'🔧 ปัญหาที่ต้องแก้',fields:[
+      {id:'field',l:'วิศวกรรมด้านไหน?',opts:['ซอฟต์แวร์ / แอป','เครื่องกล','ไฟฟ้า / อิเล็กทรอนิกส์','โยธา','เคมี','Data / AI / ML','Cloud / DevOps','Hardware / Product']},
+      {id:'problem',l:'อธิบายปัญหา',tip:'อะไรพัง หรืออะไรที่ต้องสร้าง? ภาษาง่ายๆ ก็ได้',ph:'เช่น "เว็บเราล่มทุกครั้งที่มีคนใช้พร้อมกันเกิน 500 คน"',rows:3},
+      {id:'current',l:'ตอนนี้มีอะไรอยู่แล้ว?',ph:'เช่น "WordPress บน Shared Hosting อายุ 2 ปี ทีมพัฒนา 2 คน"'},
+      {id:'limits',l:'ข้อจำกัด',ph:'เช่น "งบ 15,000 บาท/เดือน ต้องใช้ AWS กำหนด 6 สัปดาห์"'}
+    ]},
+    {s:'⚙️ Output ที่ต้องการ',fields:[
+      {id:'stack',l:'Tools และ Tech ที่ใช้',ph:'เช่น "Python, React, MySQL, AWS"'},
+      {id:'scale',l:'ระบบใหญ่แค่ไหน?',ph:'เช่น "1,000 users/วัน คาดว่าจะโต 10,000 ใน 6 เดือน"'},
+      {id:'output',l:'ต้องการอะไร?',opts:['แผนทีละขั้นตอน','โค้ดตัวอย่างพร้อมคำอธิบาย','เปรียบเทียบแนวทาง','Architecture Diagram (text)','Checklist','Technical Spec']}
+    ]}
+  ],
+  m:[
+    {s:'🔧 Technical Initiative',fields:[
+      {id:'field',l:'Engineering Domain',opts:['Software Architecture & Systems Design','Platform / Cloud Infrastructure','Data Engineering & Analytics','DevOps / SRE / CI-CD','Mobile & Frontend','AI / ML Engineering','Security Engineering','Embedded / Hardware']},
+      {id:'problem',l:'Problem Statement และ Business Impact',tip:'Frame เป็น Business Problem ไม่ใช่แค่ Technical',ph:'เช่น "Payment Service P99 Latency >3s ในช่วง Peak ทำให้ Cart Abandonment 12% กระทบรายได้ ~$80K/เดือน"',rows:3},
+      {id:'current',l:'Current State และ Technical Debt',ph:'เช่น "Monolithic Rails App Single RDS ไม่มี Cache EC2 t3.medium"'},
+      {id:'requirements',l:'Functional และ Non-functional Requirements',ph:'P99 Latency <500ms\n99.9% Uptime SLA\nรับ Traffic Spike 10x\nDeploy โดยไม่ Downtime\nGDPR Compliant',rows:4}
+    ]},
+    {s:'📊 Constraints และ Deliverables',fields:[
+      {id:'constraints',l:'Technical และ Resource Constraints',ph:'เช่น "ทีม 3 Backend + 1 DevOps งบ $5K/เดือน Infra ส่งงาน 8 สัปดาห์"'},
+      {id:'stack',l:'Current และ Target Tech Stack',ph:'เช่น "Current: Rails 6 PostgreSQL Heroku / Target: Rails 7 PgBouncer Redis AWS ECS"'},
+      {id:'risk',l:'Technical Risks และ Dependencies',ph:'เช่น "Schema Migration 50M Row / Payment API Rate Limits / ทีมไม่ชำนาญ Kubernetes"'},
+      {id:'output',l:'Engineering Deliverable Format',opts:['RFC (Request for Comments)','Architecture Decision Record (ADR)','Implementation Plan ระดับ Sprint','Tech Spike Report','Engineering Spec + Effort Estimate']}
+    ]}
+  ],
+  e:[
+    {s:'🏗 Technology Strategy',fields:[
+      {id:'initiative',l:'Strategic Technology Initiative',ph:'เช่น "Platform Re-architecture เพื่อ Real-time Personalisation รองรับการโต 10x ใน 3 ปี"',rows:2},
+      {id:'business_case',l:'Business Case และ Strategic Rationale',ph:'เช่น "คู่แข่ง Launch Real-time Q2 Batch Processing ของเราทำให้ Churn 8% TAM Impact $40M/ปี"',rows:2},
+      {id:'current',l:'Technology Landscape ปัจจุบัน',ph:'เช่น "Legacy Monolith 12 ปี 3.2M Lines 200 Engineers $8M/ปี Infra 18 เดือน Feature Backlog"'}
+    ]},
+    {s:'💰 Investment และ Risk',fields:[
+      {id:'investment',l:'Investment ที่ต้องการ',ph:'เช่น "CapEx $4.2M (ปี 1: $2.8M ปี 2: $1.4M) OpEx เพิ่ม $600K/ปี"'},
+      {id:'risk',l:'Strategic และ Operational Risks',ph:'เช่น "Migration 18 เดือน Engineer Turnover 40% Regulatory Scrutiny ด้าน Data Architecture"'},
+      {id:'timeline',l:'Multi-year Roadmap',ph:'เช่น "Phase 1 Q1-Q2: Core Data Layer Phase 2 Q3: Real-time APIs Phase 3 Q4: Personalisation"'}
+    ]},
+    {s:'🏆 Board Output',fields:[
+      {id:'tradeoffs',l:'Strategic Trade-offs สำหรับบอร์ด',ph:'เช่น "Option A: Full Rebuild $4.2M 18mo / Option B: Hybrid Strangler $2.1M 24mo / Option C: Buy vs Build"'},
+      {id:'output',l:'Board Deliverable ที่ต้องการ',opts:['Technology Investment Proposal','Build vs Buy Analysis','Technology Risk Register','3-year Technology Roadmap','CTO Briefing สำหรับนักลงทุน']}
+    ]}
+  ]
+};
+
+FD.th.cfo={
+  g:[
+    {s:'💰 งานด้านการเงิน',fields:[
+      {id:'task',l:'ต้องการทำอะไรด้านการเงิน?',tip:'ภาษาง่ายๆ — ระดมทุน? ลดต้นทุน? วางงบ?',ph:'เช่น "แสดงให้นักลงทุนเห็นว่าเราจะโตจาก 30 ล้านเป็น 150 ล้านใน 3 ปี"',rows:2},
+      {id:'biz',l:'ธุรกิจของคุณในสั้นๆ',ph:'เช่น "SaaS รายเดือนสำหรับร้านอาหาร 80 ลูกค้า รายได้ 25 ล้านบาท/ปี 3 ปีแล้ว"'},
+      {id:'numbers',l:'ตัวเลขการเงินปัจจุบัน',ph:'เช่น "ยอดขาย/เดือน 2M บาท ค่าใช้จ่าย 1.6M กำไร 400K เงินในบัญชี 4M บาท"'},
+      {id:'horizon',l:'ช่วงเวลาที่วางแผน',opts:['เดือนหน้า / ไตรมาสหน้า','ปีนี้ (12 เดือน)','2-3 ปี','5 ปี']}
+    ]},
+    {s:'⚙️ Output',fields:[
+      {id:'worry',l:'ความกังวลด้านการเงินที่ใหญ่สุด',ph:'เช่น "เงินสดจะหมดใน 4 เดือนถ้าปิดดีลใหม่ไม่ได้"'},
+      {id:'scenarios',l:'Planning Scenarios',opts:['แค่แผนที่เป็นจริงที่สุด','Base + Upside','Base + Downside','ทั้ง 3 กรณี']},
+      {id:'output',l:'รูปแบบที่ต้องการ',opts:['สรุปง่ายๆ','ตารางตัวเลข / Projection','Investor Narrative','แผนงบประมาณ']}
+    ]}
+  ],
+  m:[
+    {s:'💰 Financial Analysis Brief',fields:[
+      {id:'task',l:'Financial Analysis Mandate',ph:'เช่น "Build vs Buy Analysis สำหรับ CRM: Salesforce vs Internal Build ต้องการผลก่อน Board Q3"',rows:2},
+      {id:'company',l:'ภาพรวมธุรกิจ',ph:'เช่น "B2B SaaS Series A ARR 100M บาท Growth 42% YoY Gross Margin 85% Runway 18 เดือน"'},
+      {id:'financials',l:'P&L Highlights ปัจจุบัน',ph:'MRR: 8.7M บาท | Churn: 2.1% | CAC: 140K บาท | LTV: 1.26M บาท\nHeadcount: 34 | Burn: 6.2M/เดือน | Cash: 110M บาท',rows:3},
+      {id:'horizon',l:'Planning Horizon',opts:['Monthly Operational Review','Quarterly Board Pack','Annual Budget & Forecast','3-year Strategic Plan','Fundraising Financial Model']}
+    ]},
+    {s:'📊 Analysis Requirements',fields:[
+      {id:'scenarios',l:'Scenario Modelling ที่ต้องการ',opts:['Base Case เท่านั้น','Base + Upside + Downside','Sensitivity Analysis','Scenario vs Budget Variance']},
+      {id:'kpis',l:'KPIs และ Metrics ที่ต้องรวม',ph:'ARR, MRR, Net Revenue Retention\nCAC Payback Period\nRule of 40 Score\nGross Margin by Segment\nRunway ใน Scenario ต่างๆ',rows:4},
+      {id:'audience',l:'Audience ของรายงาน',opts:['CFO / Finance Team','CEO & Leadership Team','Board of Directors','Investors / VCs','Audit Committee']},
+      {id:'output',l:'Deliverable Format',opts:['Financial Model Structure','Board-ready Narrative + Tables','Variance Analysis vs Budget','Capital Allocation Recommendation']}
+    ]}
+  ],
+  e:[
+    {s:'💰 Board Financial Agenda',fields:[
+      {id:'agenda',l:'Board Financial Agenda Item',ph:'เช่น "Agenda Item 4: อนุมัติ FY26 Budget 950M บาท (+34% YoY) และ Series B Drawdown 270M บาทสำหรับ APAC Expansion"',rows:2},
+      {id:'company',l:'Company Financial Snapshot',ph:'ARR: 420M บาท | NRR: 118% | Gross Margin: 74%\nBurn: 14M บาท/เดือน | Runway: 22 เดือน\nValuation (last round): 2.9B บาท ที่ 6.8x ARR\nTarget: 1.4B ARR ภายใน FY27',rows:4},
+      {id:'strategic_context',l:'บริบทเชิงกลยุทธ์ที่ขับเคลื่อนการตัดสินใจ',ph:'เช่น "APAC Entry: (1) 3 Enterprise LOIs จาก SG (2) คู่แข่งระดมทุน $50M เป้า APAC Q2"'}
+    ]},
+    {s:'📊 Capital และ Risk',fields:[
+      {id:'capital',l:'Capital Requirement และ Use of Funds',ph:'เช่น "รวม 270M บาท ใน 24 เดือน: S&M 45% Headcount 35% Infra 20% Break-even เดือน 19"'},
+      {id:'scenarios',l:'Scenario Analysis สำหรับบอร์ด',ph:'เช่น "Bull: 200M บาท ARR จาก APAC (25%) Base: 108M (60%) Bear: 37M (15%)"'},
+      {id:'risk',l:'ความเสี่ยงทางการเงินและการลดความเสี่ยง',ph:'เช่น "FX Exposure 70M บาท (Hedged 60%) Hire Plan Slippage Customer Concentration Top 3 = 38% ARR"'}
+    ]},
+    {s:'🏆 Board Decision และ Output',fields:[
+      {id:'decision',l:'Resolutions ที่บอร์ดต้องอนุมัติ',ph:'เช่น "Resolution 1: อนุมัติ FY26 Budget 950M Resolution 2: อนุมัติ Series B Tranche 2 270M"'},
+      {id:'output',l:'รูปแบบ Board Document',opts:['Full Board Paper พร้อม Appendices','CFO Presentation Deck (10 Slides)','One-page Executive Financial Summary','Capital Allocation Framework','Investor Update Letter']}
+    ]}
+  ]
+};
+
+FD.th.marketing={
+  g:[
+    {s:'📣 Campaign พื้นฐาน',fields:[
+      {id:'product',l:'กำลังโปรโมทอะไร?',ph:'เช่น "แอปวางแผนเมนูอาหาร ช่วยครอบครัวยุ่งๆ ตัดสินใจว่าจะกินอะไร"'},
+      {id:'goal',l:'เป้าหมาย Campaign',opts:['ให้คนรู้จักแบรนด์','ให้คนสมัคร/ลงทะเบียน','ได้ยอดขาย/คำสั่งซื้อ','ดาวน์โหลดแอป','ดึงลูกค้าเก่ากลับมา','เปิดตัวสินค้าใหม่']},
+      {id:'audience',l:'ลูกค้าในฝัน',ph:'เช่น "พ่อแม่วัย 28-40 เหนื่อยกับการคิดว่าจะกินอะไรหลังเลิกงาน"'},
+      {id:'usp',l:'ทำไมคุณถึงดีกว่าคนอื่น?',ph:'เช่น "แอปเดียวที่เชื่อมต่อซูเปอร์มาร์เก็ตและเพิ่มวัตถุดิบลงตะกร้าอัตโนมัติ"'}
+    ]},
+    {s:'⚙️ Channels และงบประมาณ',fields:[
+      {id:'channels',l:'จะโฆษณาที่ไหนบ้าง?',opts:['Facebook & Instagram Ads','Google Ads','TikTok Ads','YouTube Ads','Email Marketing','SEO (Organic)','LINE / WhatsApp','Influencer']},
+      {id:'budget',l:'งบโฆษณาต่อเดือน',opts:['ต่ำกว่า 10,000 บาท','10,000-35,000 บาท','35,000-175,000 บาท','175,000-700,000 บาท','700,000+ บาท']},
+      {id:'output',l:'ต้องการอะไร?',opts:['กลยุทธ์ Campaign','เขียน Ad Copy จริงๆ','Email Campaign','Content Calendar','Landing Page Copy','Funnel Map']}
+    ]}
+  ],
+  m:[
+    {s:'📣 Marketing Campaign Brief',fields:[
+      {id:'product',l:'สินค้า/บริการและ Value Proposition',ph:'เช่น "Pricebook Pro — AI Pricing สำหรับ E-commerce USP: Auto-repricing ภายใน 30 วินาที vs ตลาด 4 ชม."'},
+      {id:'objective',l:'SMART Campaign Objective',ph:'เช่น "สร้าง 300 MQL ใน Q3 ที่ CPL ไม่เกิน $45 จาก Mid-market E-commerce (GMV $1M-$50M)"'},
+      {id:'audience',l:'Target Segment และ Persona',ph:'เช่น "Head of E-commerce Pain: Reprice Manual 4x/วัน Trigger: คู่แข่ง Undercut เดือนที่แล้ว"'},
+      {id:'budget',l:'Campaign Budget และ Allocation',ph:'เช่น "รวม $45K: Paid Media 60% ($27K) Content/Creative 25% ($11K) Events 15% ($7K)"'}
+    ]},
+    {s:'📊 Channel Strategy และ KPIs',fields:[
+      {id:'channels',l:'Channel Mix และเหตุผล',ph:'เช่น "LinkedIn (B2B Primary) $20K / Google Search $7K / Retargeting $5K / Webinar $8K"'},
+      {id:'kpi',l:'KPIs และ Measurement Framework',ph:'Awareness: 500K Impressions\nAcquisition: 300 MQL CPL ไม่เกิน $45\nActivation: 60 SQL MQL-to-SQL 20%\nPipeline: $2.1M Influenced\nROI: 5x ROAS by Q4',rows:5},
+      {id:'message',l:'Message Hierarchy และ Creative Direction',ph:'เช่น "Hook: หยุดเสียราคาแข่งขัน Proof: 340 แบรนด์ใช้ Real-time CTA: ดูใน 10 นาที"'},
+      {id:'output',l:'Campaign Deliverable',opts:['Full Integrated Campaign Plan','Media Plan + Budget Breakdown','Ad Copy Suite (5 Variations ต่อ Channel)','Email Nurture Sequence','Campaign Brief สำหรับ Agency']}
+    ]}
+  ],
+  e:[
+    {s:'🎯 Go-to-Market Strategy',fields:[
+      {id:'initiative',l:'GTM Initiative และบริบทธุรกิจ',ph:'เช่น "Series B GTM: Launch Enterprise Tier ($50K+ ACV) Fortune 500 เป้า $5M ARR New Business FY25"',rows:2},
+      {id:'market',l:'Market Opportunity และ Competitive Landscape',ph:'เช่น "TAM: $4.2B SAM: $380M Market Share: 2.1% คู่แข่ง: Prisync, Wiser Differentiation: Real-time AI"',rows:3},
+      {id:'audience',l:'ICP และ Buying Committee',ph:'เช่น "ICP: Enterprise E-commerce >$100M GMV Committee: CFO (Economic Buyer) Head of E-comm (Champion)"'}
+    ]},
+    {s:'💰 Investment และ Execution',fields:[
+      {id:'budget',l:'Marketing Budget และ ROI',ph:'เช่น "FY25 Marketing: $2.8M (28% ARR) CAC เป้า ไม่เกิน $8,500 Payback <18 เดือน"'},
+      {id:'channels',l:'Channel Architecture',ph:'เช่น "Demand Gen 45%: Paid Search + LinkedIn ABM Brand 25%: PR + Events Partner 20% PLG 10%"'},
+      {id:'risks',l:'Market และ Execution Risks',ph:'เช่น "Enterprise Sales Cycle 6-9 เดือน คู่แข่ง Raise $30M นักการตลาดสำคัญ 3 คนเสี่ยง Attrition"'}
+    ]},
+    {s:'🏆 Board-Level Output',fields:[
+      {id:'decision',l:'การตัดสินใจเชิงกลยุทธ์ที่ต้องการ',ph:'เช่น "อนุมัติ $800K สำหรับ Enterprise ABM Programme เป้า 50 Fortune 500 Accounts"'},
+      {id:'output',l:'Executive Deliverable Format',opts:['GTM Strategy Board Paper','Investor Narrative (Marketing Section)','Competitive Positioning Framework','Brand Architecture Recommendation']}
+    ]}
+  ]
+};
+
+FD.th.sales={
+  g:[
+    {s:'🎯 สถานการณ์การขาย',fields:[
+      {id:'product',l:'ขายอะไร?',ph:'เช่น "กล้องวงจรปิดสำหรับร้านขนาดเล็ก บันทึก 24 ชม. ส่งแจ้งเตือนมือถือ"'},
+      {id:'customer',l:'ลูกค้าในฝัน',ph:'เช่น "เจ้าของร้านอายุ 35-55 ที่เคยถูกขโมยหรือกังวลเรื่องความปลอดภัย"'},
+      {id:'stage',l:'ตอนนี้อยู่ขั้นไหนของการขาย?',opts:['หาลูกค้าใหม่','ติดต่อครั้งแรก / Cold Outreach','นัดคุยแล้ว กำลัง Follow up','เสนอราคา / ส่ง Proposal','ต่อรองราคา / ขอส่วนลด','ใกล้ปิดดีล รายละเอียดสุดท้าย','ลูกค้าเดิม ขายของเพิ่ม']},
+      {id:'objections',l:'ข้อโต้แย้งที่เคยได้ยิน (แต่ละข้อขึ้นบรรทัดใหม่)',ph:'"แพงเกินไป"\n"เรามีอยู่แล้ว"\n"ต้องถามผู้จัดการก่อน"',rows:3}
+    ]},
+    {s:'⚙️ สถานการณ์ของคุณ',fields:[
+      {id:'strength',l:'จุดขายที่แข็งแกร่งที่สุด',ph:'เช่น "ติดตั้งภายใน 1 วัน รับประกัน 3 ปี ไม่มีใครทำได้"'},
+      {id:'target',l:'เป้ายอดขาย',ph:'เช่น "เป้า 500,000 บาท/เดือน ตอนนี้ทำได้ 180,000 บาท"'},
+      {id:'output',l:'ต้องการความช่วยเหลืออะไร?',opts:['สคริปต์โทรหาลูกค้า','อีเมลส่งลูกค้าที่สนใจ','วิธีตอบข้อโต้แย้ง','กลยุทธ์การขายเดือนนี้','Template ใบเสนอราคา','วิธีปิดดีล']}
+    ]}
+  ],
+  m:[
+    {s:'🎯 Sales Management Brief',fields:[
+      {id:'product',l:'สินค้า/Solution และ ICP',ph:'เช่น "Fleet Telematics SaaS ICP: Logistics 50-500 Vehicles APAC ใช้ GPS Manual หรือ Legacy TMS"'},
+      {id:'pipeline',l:'Pipeline Health Snapshot',ph:'Open Pipeline: 130M บาท | 42 Opportunities\nAvg Deal: 3M บาท ACV | Avg Cycle: 78 วัน\nWin Rate: 24% (เป้า 30%)\nPipeline Coverage: 2.1x (ต้องการ 3x)',rows:5},
+      {id:'team',l:'Team Structure และ Performance Gap',ph:'เช่น "8 AEs: Top 2 ที่ 140% Quota / Bottom 2 ที่ <50% Gap: Discovery Quality และ Multi-threading"'},
+      {id:'stage',l:'Sales Challenge หลัก',opts:['Top-of-Funnel: Pipeline Generation','Mid-Funnel: Qualification & Acceleration','Late-Stage: Negotiation & Closing','Expansion: Upsell/Cross-sell','Team Coaching','Forecast Accuracy & CRM Hygiene']}
+    ]},
+    {s:'📊 กลยุทธ์และ Execution',fields:[
+      {id:'competition',l:'Competitive Dynamics',ph:'เช่น "คู่แข่งหลัก: Samsara Win Theme: Local Support + TCO ต่ำกว่า Displacement Rate: 30%"'},
+      {id:'objections',l:'Common Objections แต่ละขั้นตอน',ph:'Discovery: "ไม่มีงบปีนี้"\nProposal: "แพงกว่า 30%"\nClose: "รอ FY ใหม่"\nGeneral: "Pilot ก่อนได้ไหม?"',rows:4},
+      {id:'quota',l:'Quota Attainment และ Forecast',ph:'เช่น "Q3 Target 72M บาท Commit 48M Best Case 65M Gap 24M มี 6 ดีลใน Final Stage 37M รวม"'},
+      {id:'output',l:'Sales Management Deliverable',opts:['Sales Playbook สำหรับทีม','Deal Coaching Framework (MEDDPICC / SPIN)','Objection Handling Guide พร้อมสคริปต์','QBR Deck Structure','Pipeline Review Template']}
+    ]}
+  ],
+  e:[
+    {s:'🏆 Revenue Strategy',fields:[
+      {id:'revenue_goal',l:'Revenue Goal และบริบทเชิงกลยุทธ์',ph:'เช่น "FY25 ARR Target 600M บาท (+67% YoY) New Logo 270M Expansion 165M Churn Budget <14M Series B Covenant: 510M ARR"',rows:2},
+      {id:'market',l:'Market และ Competitive Position',ph:'เช่น "Market Share 4.2% ของ $1.8B APAC Win Rate 34% ASP +12% YoY NPS 67"'},
+      {id:'team',l:'GTM Organisation และ Capacity',ph:'เช่น "24 AEs (6 Enterprise 12 Mid-market 6 SMB) 8 SDRs Capacity 750M Bookings Gap: ต้องการ AEs อีก 4 คน"'}
+    ]},
+    {s:'💰 Revenue Model และ Risk',fields:[
+      {id:'model',l:'Revenue Model และ Unit Economics',ph:'เช่น "ACV Range 600K-13M บาท Avg New Logo 2.4M บาท Magic Number 0.9 (Target 1.2) Payback 16 เดือน"'},
+      {id:'scenarios',l:'Revenue Scenarios สำหรับบอร์ด',ph:'เช่น "Conservative 475M / Base 600M / Stretch 700M (3 Enterprise ใน Negotiation 160M รวม)"'},
+      {id:'risks',l:'Revenue Risks และ Mitigation',ph:'เช่น "Top 5 = 31% ARR SDR Pipeline 40% ต่ำกว่าเป้า Q3 APAC Macro 2 ดีลเลื่อน Q4"'}
+    ]},
+    {s:'🏆 Board Decision และ Output',fields:[
+      {id:'decision',l:'Revenue Decisions ที่บอร์ดต้องการ',ph:'เช่น "1. อนุมัติ S&M Budget เพิ่ม 40M บาท 2. ขยาย Series B Covenant 60 วัน 3. อนุมัติ APAC Pricing"'},
+      {id:'output',l:'Board Deliverable Format',opts:['Revenue Board Paper พร้อม Scenario Analysis','CRO Investor Presentation Section','GTM Operating Plan','Sales Capacity & Headcount Model','Customer Concentration & Renewal Risk Report']}
+    ]}
+  ]
+};
+
+FD.th.hr={
+  g:[
+    {s:'👥 สถานการณ์ HR',fields:[
+      {id:'challenge',l:'ปัญหา HR ที่กำลังเผชิญ',opts:['เขียนนโยบายบริษัท','พนักงานผลงานไม่ถึงเกณฑ์','ความสุขพนักงาน/วัฒนธรรม','เงินเดือนและสวัสดิการ','ความขัดแย้งระหว่างพนักงาน','ให้คนออกจากงาน','สร้างวัฒนธรรมทีม','ปฏิบัติตามกฎหมายแรงงาน']},
+      {id:'situation',l:'บอกว่าเกิดอะไรขึ้น',tip:'เหมือนเล่าให้เพื่อนสนิทฟัง อะไร ใคร นานแค่ไหน',ph:'เช่น "พนักงานขายคนเก่งของเรามาสายทุกวันนาน 3 สัปดาห์ ผู้จัดการคุยแล้ว 2 ครั้งแต่ยังไม่ดีขึ้น"',rows:3},
+      {id:'company',l:'ขนาดและประเภทบริษัท',ph:'เช่น "60 คน สตาร์ทอัพเทค อายุ 3 ปี สำนักงานกรุงเทพ"'},
+      {id:'tried',l:'ลองทำอะไรไปแล้ว?',ph:'เช่น "คุย 1-on-1 ให้ Warning ลายลักษณ์อักษร เสนอทำงานแบบยืดหยุ่น — ยังไม่ดีขึ้น"'}
+    ]},
+    {s:'⚙️ เป้าหมายและผลลัพธ์',fields:[
+      {id:'rules',l:'กฎหมายหรือกฎบริษัทที่เกี่ยวข้อง',ph:'เช่น "พ.ร.บ.คุ้มครองแรงงาน คู่มือ: เตือน 3 ครั้งก่อนให้ออก"'},
+      {id:'goal',l:'ผลลัพธ์ที่ต้องการ',ph:'เช่น "พนักงานปรับตัวได้ หรือออกอย่างมีศักดิ์ศรี ทีมยังขวัญดี"'},
+      {id:'urgency',l:'เร่งด่วนแค่ไหน?',opts:['จัดการสัปดาห์นี้','ภายใน 2-4 สัปดาห์','วางแผนล่วงหน้า 1-3 เดือน','โปรเจกต์ระยะยาว']},
+      {id:'output',l:'ต้องการให้สร้างอะไร?',opts:['เอกสารนโยบาย HR','แผนปฏิบัติการทีละขั้น','ร่างข้อความถึงพนักงาน','คู่มือผู้จัดการ','แบบสอบถาม Feedback','หลักสูตรอบรม']}
+    ]}
+  ],
+  m:[
+    {s:'👥 People Management Brief',fields:[
+      {id:'challenge',l:'People Management Challenge',opts:['Performance Management (PIP)','Employee Relations & Disciplinary','Organisational Restructure','Compensation Benchmarking','Culture & Engagement Programme','Talent Retention & Flight Risk','Learning & Development','HRBP Business Partnering']},
+      {id:'situation',l:'Situation Detail และ Business Impact',ph:'เช่น "Engineering Team (32 คน) Voluntary Attrition 28% YTD vs 12% บริษัท Product Launch ล่าช้า 3 ชิ้น $2M ARR เสี่ยง"',rows:3},
+      {id:'company',l:'Organisation Context',ph:'เช่น "Series B SaaS 180 FTEs 60% Engineering Remote-first เฉลี่ยอยู่ 2.1 ปี eNPS 28 (Industry: 42)"'},
+      {id:'policy',l:'Policy และ Legal Framework ที่เกี่ยวข้อง',ph:'เช่น "พ.ร.บ.คุ้มครองแรงงาน 3-strike Disciplinary Policy PIP Template มีแล้ว 40% Fixed-term 60% Indefinite"'}
+    ]},
+    {s:'📊 Analysis และ Deliverables',fields:[
+      {id:'data',l:'People Data และ Insights',ph:'Engagement Survey: 54% Favourable (ลดลง 11pts)\nExit Interviews: "ขาด Career Growth" 67%\nTenure: Eng 1.8yr Sales 2.6yr G&A 3.1yr\nPromotion Rate: 8% (ตลาด 15%)',rows:4},
+      {id:'stakeholders',l:'Stakeholders และ Approval ที่ต้องการ',ph:'เช่น "CHRO Sponsor VPs Engineering Co-owners CFO Sign-off สำหรับ Headcount Budget"'},
+      {id:'timeline',l:'Implementation Timeline',ph:'เช่น "สัปดาห์ 1-2: Root Cause สัปดาห์ 3-4: Retention Package เดือน 2: Manager Training เดือน 3: Rollout"'},
+      {id:'output',l:'HR Deliverable Format',opts:['People Strategy Memo','Retention Programme Design','PIP Documentation Suite','Restructure Communication Plan','Compensation Framework Update','Board People Metrics Dashboard']}
+    ]}
+  ],
+  e:[
+    {s:'🏆 People Strategy Agenda',fields:[
+      {id:'agenda',l:'Board People Agenda Item',ph:'เช่น "Board Item 6: Workforce Strategy FY26 — แก้ AI/ML Engineering Gap และ APAC Leadership Gap สนับสนุน ARR Target 1.3B บาท"',rows:2},
+      {id:'org_context',l:'Organisational Health Snapshot',ph:'Headcount: 340 (Target 420 EOY)\nVoluntary Attrition: 19% (Industry 14%)\neNPS: 34 (Target 50)\nPromotion Rate: 11% (Target 18%)\nSenior Women: 22% (Target 35%)\nL&D/FTE: 27,000 บาท (Industry 47,000)',rows:5},
+      {id:'strategic_link',l:'Link ถึง Business Strategy',ph:'เช่น "AI/ML Gap กระทบ Product Roadmap Q3-Q4 (6 Features ล่าช้า) APAC Gap ล่าช้า 270M บาท Market Entry"'}
+    ]},
+    {s:'💼 Investment และ Risk',fields:[
+      {id:'investment',l:'People Investment ที่ต้องการ',ph:'เช่น "FY26 Incremental 140M บาท: Compensation 60M L&D 20M APAC Hires x4 40M DEI 20M"'},
+      {id:'risk',l:'People Risks และ Implications',ph:'เช่น "AI/ML Engineers 8 คน ค่า Replace 6M/คน 6 เดือน Culture Drift หลัง Series B 3 สัญญาต้อง Renegotiate"'},
+      {id:'scenarios',l:'Workforce Planning Scenarios',ph:'เช่น "Invest: Attrition 12% On-track Cost +140M บาท / Status Quo: Attrition 25% Revenue เสี่ยง 200M / Restructure: 20 Roles ประหยัด 60M"'}
+    ]},
+    {s:'🏆 Board Decision และ Output',fields:[
+      {id:'decision',l:'Board Resolutions ที่ต้องการ',ph:'เช่น "Resolution 1: อนุมัติ People Strategy และ 140M บาท Resolution 2: อนุมัติ APAC Hiring Resolution 3: Attrition Risk Register"'},
+      {id:'output',l:'Board Document Format',opts:['People Strategy Board Paper','Workforce Risk Register','Organisational Design Recommendation','CHRO Investor Presentation Section','Culture & Engagement Plan','Remuneration Committee Proposal']}
+    ]}
+  ]
+};
+
+FD.th.ta={
+  g:[
+    {s:'🔍 ตำแหน่งงาน',fields:[
+      {id:'jobtitle',l:'ตำแหน่งงานและแผนก',ph:'เช่น "Customer Success Manager — ทีม SaaS รายงานต่อ VP of Sales"'},
+      {id:'must',l:'ทักษะที่ต้องมีตั้งแต่วันแรก',ph:'เช่น "Customer Service 3 ปีขึ้นไป ภาษาอังกฤษดี ใช้ Salesforce ได้"'},
+      {id:'nice',l:'ทักษะที่มีก็ดีแต่ไม่บังคับ',ph:'เช่น "พูดภาษาไทย เคยทำ SaaS มาก่อน เคย Demo สินค้า"'},
+      {id:'culture',l:'วัฒนธรรมและบรรยากาศทำงาน',ph:'เช่น "สตาร์ทอัพโตเร็ว ทุกคนแก้ปัญหาเองได้ Casual ไม่เป็นทางการ"'}
+    ]},
+    {s:'⚙️ กระบวนการและผลลัพธ์',fields:[
+      {id:'package',l:'เงินเดือนและสวัสดิการ',ph:'เช่น "เงินเดือน 65,000-85,000 บาท ประกันสุขภาพ ลาพักร้อน 15 วัน WFH วันศุกร์"'},
+      {id:'challenge',l:'อะไรทำให้การจ้างนี้ยาก?',ph:'เช่น "ผู้สมัครที่ดีมักได้ข้อเสนออื่นก่อนเราตัดสินใจ"'},
+      {id:'output',l:'ต้องการให้สร้างอะไร?',opts:['Job Description เต็มรูปแบบ','คำถามสัมภาษณ์','Candidate Scorecard','LinkedIn Outreach Message','Template Offer Letter','Job Board Ad (สั้นกระชับ)']}
+    ]}
+  ],
+  m:[
+    {s:'🔍 Hiring Brief',fields:[
+      {id:'jobtitle',l:'Role Title Level และ Reporting Line',ph:'เช่น "Senior Data Engineer (IC4) Data Platform Team รายงาน Head of Data Dotted Line CTO"'},
+      {id:'must',l:'Non-negotiable Requirements',ph:'Must Have:\n5+ ปี Data Engineering\nชำนาญ dbt + Spark + Airflow\nประสบการณ์ Medallion Architecture\nProduction ที่ Scale >1TB\nภาษาอังกฤษเขียนดีเยี่ยม',rows:5},
+      {id:'nice',l:'Preferred Qualifications',ph:'Strong Preference:\nประสบการณ์ High-growth SaaS\nContribute Open-source\nประสบการณ์ Data Contracts\nเคยนำทีมเล็ก 1-3 คน',rows:4},
+      {id:'persona',l:'Ideal Candidate Profile และ Motivation',ph:'เช่น "Data Engineer ที่ถึง Ceiling ใน Big Company อยากเป็นเจ้าของ Platform ตั้งแต่ต้น Motivated ด้วย Craft ไม่ใช่ Management"'}
+    ]},
+    {s:'📊 Hiring Strategy',fields:[
+      {id:'package',l:'Compensation Structure และ Benchmarking',ph:'เช่น "Base 180-220K บาท/เดือน (P50-P75 Radford APAC) Equity 0.05-0.08% (4yr Vest 1yr Cliff) Bonus 10% KPI-linked"'},
+      {id:'process',l:'Interview Process และ Timeline',ph:'เช่น "Stage 1: Recruiter 30 นาที Stage 2: Technical 60 นาที Stage 3: Take-home 4 ชม. Stage 4: Head of Data + CTO รวม 3 สัปดาห์"'},
+      {id:'sourcing',l:'Sourcing Strategy',opts:['LinkedIn Recruiter (Active Sourcing)','Boolean Search + InMail Campaign','Internal Referral (Incentivised)','Specialist Tech Recruiters','Targeted Job Boards (Wellfound Levels.fyi)','Community (Slack GitHub Meetups)']},
+      {id:'challenge',l:'Hiring Challenge และ Risk',ph:'เช่น "ตลาด dbt + Spark หายาก 2 Hire ก่อนหน้า Fail Probation เพราะไม่มีประสบการณ์ Scale จริง"'},
+      {id:'output',l:'Deliverable ที่ต้องการ',opts:['Job Description (Internal + External)','Structured Interview Guide (ทุก Stage)','Technical Assessment Brief','Candidate Evaluation Scorecard','Diversity Hiring Plan']}
+    ]}
+  ],
+  e:[
+    {s:'🏆 Executive Talent Strategy',fields:[
+      {id:'agenda',l:'Talent Agenda Item และบริบทธุรกิจ',ph:'เช่น "Critical Gap: CRO — VP Sales ปัจจุบันขาดประสบการณ์ Enterprise ปิด Enterprise Target 270M บาทไม่ได้ บอร์ดเกี่ยวข้อง"',rows:2},
+      {id:'role_scope',l:'Role Scope Accountability และ Success Profile',ph:'เช่น "CRO: เป้า ARR 600M บาท นำ GTM 36 คน Mandate 18 เดือน: 5 Enterprise >15M บาท ACV สร้าง Scalable Process พัฒนา VP Succession"',rows:3},
+      {id:'market',l:'Executive Talent Market Context',ph:'เช่น "CRO ใน APAC SaaS: ตลาดบางมาก ~120 คน Notice 3-6 เดือน Compensation Base 9-13M บาท + Equity"'}
+    ]},
+    {s:'💼 Search และ Assessment',fields:[
+      {id:'package',l:'Executive Compensation Package',ph:'เช่น "Base 11.5M บาท STI 50% Base on ARR LTI 0.4% Equity (4yr Vest 1yr Cliff CoC Acceleration)"'},
+      {id:'process',l:'Executive Search Process และ Governance',ph:'เช่น "Search Firm: Korn Ferry 8-10 Candidates 4-5 Interview Panel: CEO CFO 2 Board Members Target Start: 90 วัน"'},
+      {id:'risk',l:'Key Risks ในการ Hire นี้',ph:'เช่น "Time-to-fill >90 วัน Q3 Pipeline 100M ไม่มีคนดูแล Interim CRO (Board Member) Cultural Fit: 2 CRO ก่อนหน้า Resign 12 เดือน"'}
+    ]},
+    {s:'🏆 Board Decision และ Output',fields:[
+      {id:'decision',l:'Board Decisions ที่ต้องการ',ph:'เช่น "1. อนุมัติ Search Budget 6M บาท 2. ยืนยัน Compensation Framework 3. ตกลง Board Interview Panel"'},
+      {id:'output',l:'Board Deliverable Format',opts:['Executive Search Mandate Brief','Board Talent Committee Paper','Compensation Benchmarking Report','Succession Planning Update','Leadership Assessment Framework','Offer Approval Memo']}
+    ]}
+  ]
+};
+
+FD.th.teacher={
+  g:[
+    {s:'🎓 บทเรียน',fields:[
+      {id:'subject',l:'วิชาและหัวข้อที่สอน',tip:'ยิ่งละเอียดยิ่งได้แผนที่ดี',ph:'เช่น "คณิตศาสตร์ — การบวกเศษส่วนตัวส่วนต่างกัน (ม.1)"'},
+      {id:'grade',l:'ระดับชั้นหรืออายุนักเรียน',opts:['เด็กเล็ก (อายุ 5-8 ปี)','ประถม (อายุ 8-11 ปี)','มัธยมต้น (อายุ 11-14 ปี)','มัธยมปลาย (อายุ 14-18 ปี)','มหาวิทยาลัย / วิทยาลัย','ผู้ใหญ่ / อบรมวิชาชีพ']},
+      {id:'duration',l:'ระยะเวลาสอน',opts:['15-20 นาที (กิจกรรมสั้น)','30 นาที (ครึ่งคาบ)','45-50 นาที (คาบปกติ)','80-90 นาที (คาบยาว)','ครึ่งวัน Workshop','เต็มวัน / หลายวัน']},
+      {id:'objective',l:'เป้าหมายการเรียนรู้',tip:'เติมประโยค: "หลังเรียนจบ นักเรียนสามารถ ___"',ph:'เช่น "บวกเศษส่วน 1/3 + 1/4 ได้ถูกต้องและอธิบายเหตุผลได้"'}
+    ]},
+    {s:'⚙️ รายละเอียดการสอน',fields:[
+      {id:'method',l:'ชอบสอนแบบไหน?',opts:['ครูอธิบาย + นักเรียนฝึก','กิจกรรมกลุ่มและ Teamwork','ค้นพบผ่านการทดลอง','วิดีโอ + อภิปราย','เกมและการแข่งขัน','โปรเจกต์จากโลกจริง','Online / Blended']},
+      {id:'struggles',l:'นักเรียนมักทำผิดอะไร?',ph:'เช่น "ลืมหาตัวส่วนร่วมก่อน แล้วบวกทั้งตัวเศษและตัวส่วนเลย"'},
+      {id:'resources',l:'อุปกรณ์ที่มีในห้องเรียน',ph:'เช่น "กระดานไวท์บอร์ด ใบงาน แท็บเล็ต 1 เครื่องต่อ 2 คน"'},
+      {id:'output',l:'ต้องการให้สร้างอะไร?',opts:['แผนการสอนเต็มรูปแบบ','ใบงานนักเรียน','ข้อสอบพร้อมเฉลย','โครงสร้าง Slide','เกม / กิจกรรมสนุก','จดหมายถึงผู้ปกครอง']}
+    ]}
+  ],
+  m:[
+    {s:'📚 Curriculum Design Brief',fields:[
+      {id:'subject',l:'วิชา Curriculum Framework และ Unit',ph:'เช่น "คณิตศาสตร์ หลักสูตรแกนกลาง 2551 ป.6 Unit 3: เศษส่วนและทศนิยม (12 บทเรียน)"'},
+      {id:'grade',l:'นักเรียนและบริบท',ph:'เช่น "ป.6 4 ห้องๆ ละ 30 คน Mixed Ability 15% ELL โรงเรียนเอกชน Bilingual กรุงเทพ"'},
+      {id:'objective',l:"Learning Objectives (Bloom's Levels)",ph:"Knowledge: ระบุ Equivalent Fractions\nComprehension: อธิบายว่าทำไมต้องหาตัวส่วนร่วม\nApplication: แก้โจทย์ 20 ข้อ\nAnalysis: ระบุ Error Pattern จากงานเพื่อน\nSynthesis: สร้างโจทย์ตัวเอง\nEvaluation: เลือกวิธีแก้และอธิบายเหตุผล",rows:6},
+      {id:'duration',l:'ระยะเวลา Unit และโครงสร้างบทเรียน',ph:'เช่น "12 บทเรียน x 50 นาที 4 สัปดาห์ โครงสร้าง: 3 แนะนำ 4 Guided Practice 3 Independent 2 Assessment"'}
+    ]},
+    {s:'📊 Pedagogy และ Differentiation',fields:[
+      {id:'method',l:'แนวทางการสอนและฐานหลักฐาน',ph:'เช่น "Concrete-Pictorial-Abstract (CPA) Mastery Learning 80% ก่อนไปต่อ Collaborative Pairs + Small Group"'},
+      {id:'differentiation',l:'Differentiation Strategy',ph:'Support: Manipulatives + Fraction Strips + Worked Examples\nCore: Mixed Practice + Scaffolded\nExtension: Open-ended + Cross-curricular\nELL: Visual Vocabulary + Bilingual Glossary',rows:4},
+      {id:'assessment',l:'Assessment Strategy',ph:'เช่น "Formative: Exit Tickets ทุก 2 บทเรียน Hinge Questions Summative: 40 ข้อ (50% Fluency 50% Reasoning) Mastery 80%"'},
+      {id:'output',l:'Curriculum Deliverable ที่ต้องการ',opts:['Full Unit Plan (ทุกบทเรียน)','Differentiated Resources (3 Levels)','Assessment Suite (Formative + Summative)','Teacher Guide พร้อม Pedagogical Notes','Student Workbook (Print-ready)','Parent Curriculum Letter']}
+    ]}
+  ],
+  e:[
+    {s:'🏫 Educational Strategy และ Policy',fields:[
+      {id:'agenda',l:'Educational Leadership Agenda Item',ph:'เช่น "Board Agenda: นำ Mastery Maths Programme มาใช้ K-12 (600 นักเรียน) แทน Scheme of Work เดิม เพื่อแก้คะแนน PISA/O-NET ที่ลดลง 3 ปี"',rows:2},
+      {id:'context',l:'School Performance Context',ph:"O-NET Math ป.6: 38.2% (ค่าเฉลี่ยประเทศ 42.1%)\nInternal: 31% ของ ป.6 ต่ำกว่า Grade Level\nครู (Survey): 58% 'มั่นใจ' สอนคณิต (ลดลง 14pts)\nParent Satisfaction: 62% (ลดลง 8pts YoY)\nComparator School: 71%",rows:5},
+      {id:'strategic_link',l:'บริบทเชิงกลยุทธ์และกฎระเบียบ',ph:'เช่น "สอดคล้อง OBEC School Improvement Mandate Board KPI: O-NET +8pts ใน 3 ปี Accreditation 18 เดือน — คณิตถูก Flag"'}
+    ]},
+    {s:'💰 Programme Investment และ Implementation',fields:[
+      {id:'investment',l:'Programme Investment และ Resources',ph:'เช่น "Mastery Maths Licence 3 ปี $45K Teacher CPD $18K (ปี 1) $9K (ปี 2-3) Materials $12K Total 3 ปี $99K vs เดิม $31K"'},
+      {id:'implementation',l:'Implementation Strategy',ph:'เช่น "ปี 1: Pilot ป.4-6 (3 ครู 90 นักเรียน) ปี 2: K-6 (12 ครู 360 นักเรียน) ปี 3: K-12 (24 ครู 600 นักเรียน)"'},
+      {id:'risk',l:'Implementation Risks และ Mitigations',ph:'เช่น "ครูต่อต้าน: Co-design ไม่ใช่ Top-down ผู้ปกครองสับสน: Parent Workshop Series ผลช้า 18-24 เดือน: Interim Termly Metrics"'}
+    ]},
+    {s:'🏆 Board Decision และ Output',fields:[
+      {id:'decision',l:'Board Resolutions ที่ต้องการ',ph:'เช่น "Resolution 1: อนุมัติ Mastery Maths Programme และ $99K Resolution 2: มอบอำนาจ Head of School เลือก Provider"'},
+      {id:'output',l:'Board Document Format',opts:['School Improvement Board Paper','Curriculum Change Proposal','Evidence Review & Programme Comparison','Implementation & Risk Plan','Staff Consultation Report','Parent Communication Strategy']}
+    ]}
+  ]
+};
+
+FD.th.influencer={
+  g:[
+    {s:'🌟 คอนเทนต์ของคุณ',fields:[
+      {id:'niche',l:'Niche / หมวดคอนเทนต์',opts:['Lifestyle และชีวิตประจำวัน','แฟชั่นและความงาม','อาหารและการทำอาหาร','ท่องเที่ยว','เงินและการลงทุน','ฟิตเนสและสุขภาพ','เทคโนโลยีและแกดเจ็ต','การเลี้ยงลูก','ธุรกิจและอาชีพ','เกม','ความยั่งยืน','สุขภาพจิต']},
+      {id:'platform',l:'แพลตฟอร์มที่โพสต์',opts:['Instagram Feed','Instagram Reel/Story','TikTok','YouTube','YouTube Shorts','Facebook','X / Twitter','LinkedIn','Blog / Newsletter','Podcast']},
+      {id:'followers',l:'ผู้ติดตามของคุณ',tip:'จำนวนและโปรไฟล์ผู้ติดตาม',ph:'เช่น "45K Followers ผู้หญิงไทยอายุ 20-30 ชอบท่องเที่ยวประหยัด"'},
+      {id:'thispost',l:'โพสต์นี้เกี่ยวกับอะไร?',ph:'เช่น "เพิ่งกลับจากเชียงใหม่ 3 วัน ใช้เงินไม่ถึง 3,000 บาท"',rows:2}
+    ]},
+    {s:'⚙️ สไตล์และผลลัพธ์',fields:[
+      {id:'feeling',l:'ความรู้สึกที่อยากสร้าง',opts:['ได้แรงบันดาลใจ','สนุก / ขำ','ได้ความรู้ใหม่','FOMO!','เชื่อใจฉันมากขึ้น','อยากซื้อของที่ฉันใช้']},
+      {id:'collab',l:'มี Paid Partnership ไหม?',ph:'เช่น "AirAsia — พูดถึงเส้นทาง BKK-เชียงใหม่ ให้ดูเป็นธรรมชาติ"'},
+      {id:'cta',l:'อยากให้ผู้ติดตามทำอะไร?',ph:'เช่น "Save โพสต์นี้ไว้สำหรับทริปถัดไป"'},
+      {id:'output',l:'ต้องการอะไร?',opts:['แคปชั่น + Hashtag พร้อมโพสต์ได้เลย','สคริปต์วิดีโอ','Content Calendar 30 วัน','อีเมล Pitch ส่งให้แบรนด์','เขียน Bio ใหม่','Storyboard สำหรับ Reel/Story']}
+    ]}
+  ],
+  m:[
+    {s:'🌟 Content Strategy Brief',fields:[
+      {id:'niche',l:'Content Pillar และ Niche Positioning',ph:'เช่น "Travel Finance Niche: The Luxury Minimalist — แสดงการบิน Business Class ในราคา Economy Differentiation: Points Hacking + Destination Deep-dives"'},
+      {id:'platform',l:'Primary Channel และ Content Format',ph:'เช่น "Primary: YouTube (Long-form 12-18 นาที) Secondary: Instagram Reels (60s) Newsletter (รายสัปดาห์ 8K Subscribers)"'},
+      {id:'audience',l:'Audience Persona และ Data Insights',ph:'เช่น "Core: Thai Professionals 27-38 HHI 80K+ บาท/เดือน 2-3 International Trips/ปี Pain: อยากท่องเที่ยว Premium แต่รู้สึกไม่ Afford"'},
+      {id:'content_goal',l:'Strategic Goal ของ Content นี้',opts:['Audience Growth (เข้าถึงผู้ดูใหม่)','Engagement Depth (Comment Save Watch Time)','Monetisation (ยอดขาย Affiliate Brand Deal)','Authority Building','Algorithm / SEO Growth','Community Building']}
+    ]},
+    {s:'📊 Content Production และ Brand',fields:[
+      {id:'thispost',l:'Content Concept และ Narrative',tip:'Hook เรื่อง Payoff',ph:"Hook: 'ผมบิน Business ไปโตเกียว 4,200 บาท — นี่คือวิธีที่ทำ'\nStory: Points Strategy, Booking Timing, Lounge\nPayoff: Checklist 5 ขั้นตอนที่เริ่มได้เลยสัปดาห์นี้",rows:4},
+      {id:'collab',l:'Brand Partnership Details',ph:'เช่น "AMEX Platinum — 3 x Instagram Reels + 1 YouTube Integration 2 นาที Key: Lounge + 5x Points ต้องมี #AmexPartner Due: 15 ต.ค."'},
+      {id:'kpi',l:'Success Metrics สำหรับ Content นี้',ph:'เช่น "YouTube: 50K Views 65% Retention Instagram: 200K Reach 6% Engagement Affiliate: 150 Card Applications"'},
+      {id:'output',l:'Content Deliverable ที่ต้องการ',opts:['Full YouTube Script (พร้อม Timestamps)','Video Storyboard + Shot List','Instagram Carousel Copy (10 Slides)','Caption Suite (ปรับตาม Platform)','Content Series Plan (4-8 ชิ้น)']}
+    ]}
+  ],
+  e:[
+    {s:'🏆 Creator Business Strategy',fields:[
+      {id:'business_context',l:'Creator Business Overview',ph:'รายได้ Creator:\nBrand Deals: 4.2M บาท (60%)\nAffiliate: 980K บาท (14%)\nDigital Products: 700K บาท (10%)\nSpeaking/Events: 560K บาท (8%)\nCourse/Membership: 560K บาท (8%)\nTotal: 7M บาท | Target: 12M บาท',rows:6},
+      {id:'brand_strategy',l:'Personal Brand Strategy และ Positioning',ph:'เช่น "Reposition จาก Budget Travel Tips เป็น Smart Travel for Ambitious Professionals ดึง Premium Brand Partners (50K+ Deals) และ Launch Membership"',rows:3},
+      {id:'market',l:'Creator Market Context และ Competitive Position',ph:'เช่น "Thai Travel Creator: ~200 Monetised Accounts Top 20 รายได้ >3M บาท/ปี ของฉัน: อันดับ 6 Revenue อันดับ 3 Engagement คู่แข่งได้ 15M จาก Media Group Q1"'}
+    ]},
+    {s:'💰 Revenue และ Partnership Strategy',fields:[
+      {id:'deals',l:'Brand Partnership Strategy และ Rate Card',ph:'เช่น "Rates: YouTube Integration 280K บาท Instagram Reel 85K Newsletter 45K Target: +40% YoY โดย Anchor ที่ Output Metrics (ประกัน 50K Views)"'},
+      {id:'product',l:'Owned Product และ Community Strategy',ph:'เช่น "Launch Points Insider Membership 2,999 บาท/เดือน เป้า 500 Members = 17.9M บาท/ปี Product: Weekly Deal Alerts + Community + Live Q&A"'},
+      {id:'risk',l:'Business Risks และ Strategic Decisions',ph:'เช่น "Risk 1: Brand Deals 60% Revenue — 1 Brand Pause Q3 = 1.2M Gap Risk 2: YouTube 70% Reach Risk 3: Solo อยู่ กำลังคิดจ้างคนแรก"'}
+    ]},
+    {s:'🏆 Strategic Output',fields:[
+      {id:'decision',l:'Key Strategic Decisions ที่กำลังเผชิญ',ph:'เช่น "Decision 1: รับข้อเสนอ 8M Media Company (50% Stake) Decision 2: จ้าง Content Producer 60K/เดือน Decision 3: Course vs Membership vs ทั้งคู่"'},
+      {id:'output',l:'Strategic Document ที่ต้องการ',opts:['Creator Business Strategy Plan (1 ปี)','Brand Partnership Media Kit & Rate Card','Revenue Diversification Roadmap','Creator-to-Media Company Transition Plan','Investor / Partner Pitch Deck']}
+    ]}
+  ]
+};
+
+// ── CLOSINGS ──────────────────────────────────────────────────────────────
+var CL={
+  en:{
+    content:{g:'Write the complete content based on all the above. Feel human not robotic. Start with the hook in the very first sentence. Short paragraphs. End with a clear call to action.',m:'Produce the complete content piece based on this brief. Meet the SEO requirements, hit the defined funnel stage, achieve the brand voice, and end with a single clear conversion CTA. Provide a meta title and description.',e:'Develop the full thought leadership content based on this executive brief. Establish a clear POV backed by the specified evidence, structured for the defined distribution channels. Include a headline suite (3 options) and a LinkedIn amplification version (150 words).'},
+    review:{g:'Write a full honest product review. Structure: 1) Quick verdict 2) What is it and who for 3) Pros in detail 4) Cons in detail 5) Final score and recommendation. Sound like a real person.',m:'Produce a structured business product evaluation report. Format: Executive Summary → Business Context → Evaluation Criteria and Scoring → Pros and Cons → ROI Analysis → Competitive Comparison → Team Recommendation → Next Steps.',e:'Produce a board-ready vendor assessment paper. Structure: Executive Summary (1 page max) → Strategic Fit → Financial Analysis (TCO and ROI) → Risk Register → Governance → Board Recommendation with resolution wording → Appendix.'},
+    caption:{g:'Write the caption(s) ready to copy and paste. Include emojis, line breaks, and hashtags. The first line must stop someone from scrolling. Match the platform style.',m:'Produce the full copy suite for this campaign post. Deliver: 1) Primary caption platform-optimised 2) Hashtag set 3) Alt text for accessibility 4) A/B variant if requested 5) Brief creative rationale (2 sentences) explaining why the copy works for the defined audience and KPI.',e:'Deliver the complete campaign content framework. Include: 1) Master messaging document 2) Caption suite for all platforms adapted per platform 3) Copy guidelines and tone-of-voice notes 4) Legal compliance checklist 5) Performance measurement framework aligned to board-level KPIs.'},
+    lawyer:{g:'Provide the requested legal output. Write so the client understands it while staying accurate. Flag areas needing professional counsel. Add a disclaimer that this is for informational purposes only.',m:'Deliver the requested legal deliverable. Flag each material risk clearly with a traffic-light rating (Red/Amber/Green). Note: this output is for internal review — final sign-off must be by qualified legal counsel in the relevant jurisdiction.',e:'Produce the board-level legal document. Format for a non-legal board audience: executive summary first, supporting analysis appended. Include: resolution wording, risk exposure quantification, recommended decision and rationale, and a clear contingency plan.'},
+    engineer:{g:'Provide a complete practical solution. Explain your reasoning. Include step-by-step implementation. Point out risks and how to avoid them. Use code blocks where helpful.',m:'Deliver the engineering document in the requested format. Include: problem restatement, proposed solution, rationale for key decisions, trade-off analysis (at least 2 alternatives), implementation plan with effort estimates, and risk register.',e:'Produce the board-level technology document. Non-technical board members must understand the strategic choice. Include: business case summary, strategic options with pros/cons/costs, recommended option with rationale, implementation roadmap, risk register with financial quantification, and the specific board resolutions required.'},
+    cfo:{g:'Deliver a clear financial output. Use simple numbers and explain what they mean. State your assumptions. End with a clear recommendation.',m:'Produce the financial analysis in the requested format. Include: executive summary, key assumptions clearly stated, model structure or narrative, scenario outputs, sensitivity analysis on the top 3 drivers, risk flags, and a clear recommendation with financial rationale.',e:'Deliver the board-level financial document. Format: 1-page executive summary → financial detail → scenario analysis → risk quantification → recommended resolutions. All figures must be precise. State confidence levels on projections. Include a sensitivity table for the top 2 variables.'},
+    marketing:{g:'Create the requested marketing output. Be specific — give real ad copy, real numbers, real strategies. Make it immediately usable not just theory.',m:'Deliver the complete marketing deliverable. Include: campaign strategy with channel-by-channel plan, budget allocation, creative direction, KPI targets with measurement methodology, and a 90-day execution timeline. Ready to brief an agency or internal team.',e:'Produce the board-level GTM or marketing strategy document. Structure: Market opportunity and competitive position → Target ICP and buying committee → Channel architecture and attribution → Budget requirement and ROI model → Risk register → Strategic recommendation and board approvals required. Include an investor-facing narrative summary (250 words).'},
+    sales:{g:'Provide the requested sales tool. Include word-for-word scripts where relevant. Focus on what moves a customer from maybe to yes.',m:'Deliver the sales management document. Include: situation analysis, recommended strategy, specific tactics and scripts, objection handling framework, team coaching guidance, metrics to track, and a 30/60/90-day execution plan. Ready for immediate team deployment.',e:'Produce the board-level revenue document. Include: current state analysis, scenario-based revenue projections, pipeline coverage analysis, GTM capacity assessment, key risks with quantified impact, and specific board approvals or resource decisions required. Provide a one-page CRO narrative suitable for an investor update.'},
+    hr:{g:'Create the requested HR output. Balance fairness to the employee with protecting the company. Include specific wording. Flag any legal risks.',m:'Deliver the people management document. Include: situation assessment, recommended approach with rationale, step-by-step action plan, specific communication scripts or document templates, legal risk flags, and success metrics. Ready for HRBP or line manager to execute.',e:'Produce the board-level people strategy document. Include: workforce health assessment, strategic gap analysis, investment options with ROI modelling, risk register, recommended resolutions, and implementation roadmap. Include an investor-facing people narrative where applicable.'},
+    ta:{g:"Deliver the requested talent acquisition material. Job descriptions must lead with what is in it for the candidate. Interview questions should be behaviour-based.",m:'Produce the hiring brief and supporting documents. Job descriptions must be compelling and specific. Interview guides must be structured with evaluation criteria linked to the success profile. Provide a sourcing strategy with specific search strings or outreach templates.',e:'Produce the board-level talent strategy document. Include: role criticality assessment, market context, proposed process and timeline, compensation benchmark, risk analysis, and specific board approvals required. Format the search mandate brief for an executive search firm if applicable.'},
+    teacher:{g:'Create the teaching material. Make it engaging and age-appropriate. Easy for any teacher to pick up and use immediately.',m:"Produce the full curriculum design deliverable. All materials must be aligned to the specified curriculum standards and Bloom's Taxonomy levels. Differentiation for all ability groups must be explicit. Assessment tools must include marking guidance and the mastery threshold.",e:'Produce the educational strategy board document. Include: performance data analysis, evidence review of proposed programme, cost-benefit analysis, implementation risk assessment, success metrics and evaluation framework, and specific board resolutions required.'},
+    influencer:{g:"Create the requested influencer content. Sound like a real person. Match the platform's natural style. If there is a partnership weave it in naturally — it should never feel like an ad.",m:"Deliver the complete content production package. All copy must be platform-native, aligned to brand tone-of-voice, and optimised for the specified success metrics. If sponsored content is included ensure all compliance requirements are met. Provide a brief performance prediction and rationale.",e:'Produce the creator business strategy document. Treat the creator as a media business making strategic decisions. Include: revenue model analysis, brand positioning strategy, monetisation diversification plan, risk assessment, strategic options with financial projections, and a specific recommendation with implementation roadmap.'}
+  },
+  th:{
+    content:{g:'เขียนเนื้อหาฉบับเต็มตามข้อมูลทั้งหมดข้างต้น ให้รู้สึกเป็นมนุษย์ ไม่ใช่โรบอท ใช้ Hook ในประโยคแรก ย่อหน้าสั้น จบด้วย Call to Action ที่ชัดเจน',m:'ผลิต Content ชิ้นนี้ตาม Brief ต้องตรงตาม SEO Requirements Funnel Stage Brand Voice และจบด้วย CTA เดียวที่ชัดเจน ส่ง Meta Title และ Description ด้วย',e:'พัฒนา Thought Leadership Content ตาม Executive Brief ต้องมี POV ที่ชัดเจนอ้างอิงหลักฐานที่ระบุ และโครงสร้างสำหรับช่องทางที่กำหนด ส่ง Headline Suite (3 ตัวเลือก) และ LinkedIn Version 150 คำ'},
+    review:{g:'เขียนรีวิวสินค้าที่ซื่อสัตย์และละเอียด โครงสร้าง: 1) สรุปเร็ว 2) คืออะไร/สำหรับใคร 3) ข้อดีละเอียด 4) ข้อเสียละเอียด 5) คะแนนและคำแนะนำ ต้องฟังดูเหมือนคนจริงๆ',m:'ผลิต Business Product Evaluation Report ตาม Input ทั้งหมด Format: Executive Summary → Business Context → Evaluation Criteria & Scoring → Pros & Cons → ROI → Competitive Comparison → Team Recommendation → Next Steps',e:'ผลิต Board-ready Vendor Assessment Paper โครงสร้าง: Executive Summary (1 หน้า) → Strategic Fit → Financial Analysis (TCO & ROI) → Risk Register → Governance → Board Recommendation พร้อม Resolution Wording → Appendix'},
+    caption:{g:'เขียนแคปชั่นที่พร้อม Copy-Paste ได้เลย รวม Emoji ขึ้นบรรทัด Hashtag บรรทัดแรกต้องดึงให้หยุดเลื่อน ตรงสไตล์แพลตฟอร์ม',m:'ผลิต Copy Suite สำหรับ Campaign Post: 1) Primary Caption 2) Hashtag Set 3) Alt Text 4) A/B Variant ถ้าต้องการ 5) Creative Rationale 2 ประโยค',e:'ส่ง Campaign Content Framework: 1) Master Messaging Document 2) Caption Suite ทุก Platform 3) Copy Guidelines 4) Legal Compliance Checklist 5) Performance Measurement Framework'},
+    lawyer:{g:'จัดทำผลลัพธ์ทางกฎหมายตามที่ขอ เขียนให้ลูกค้าเข้าใจได้ ระบุส่วนที่ต้องปรึกษาทนาย ใส่ Disclaimer ว่าเป็นข้อมูลเพื่อการศึกษาเท่านั้น',m:'ส่ง Legal Deliverable ตาม Input Flag ความเสี่ยงสำคัญด้วย Traffic-light Rating (Red/Amber/Green) หมายเหตุ: ต้องให้ Legal Counsel ที่มีคุณสมบัติ Sign-off ก่อนใช้จริง',e:'ผลิต Board-level Legal Document สำหรับบอร์ดที่ไม่ใช่นักกฎหมาย: Executive Summary ก่อน วิเคราะห์ตามหลัง รวม Resolution Wording Risk Quantification คำแนะนำพร้อมเหตุผล และ Contingency Plan'},
+    engineer:{g:'ให้วิธีแก้ปัญหาที่ครบถ้วนและใช้งานได้จริง อธิบายเหตุผล ให้ขั้นตอน Implement ที่ชัดเจน ระบุความเสี่ยงและวิธีป้องกัน ใช้ Code Block ตามความเหมาะสม',m:'ส่ง Engineering Document ตามรูปแบบที่ขอ รวม: Problem Restatement, Proposed Solution, เหตุผลการตัดสินใจ, Trade-off Analysis (2 ทางเลือก), Implementation Plan พร้อม Effort Estimate, Risk Register',e:'ผลิต Board-level Technology Document สำหรับบอร์ดที่ไม่ใช่ Technical รวม: Business Case Summary, Strategic Options พร้อม Pros/Cons/Costs, Recommended Option พร้อมเหตุผล, Implementation Roadmap, Risk Register พร้อม Financial Quantification, Board Resolutions ที่ต้องการ'},
+    cfo:{g:'ส่งผลลัพธ์ทางการเงินที่ชัดเจน ใช้ตัวเลขง่ายๆ อธิบายความหมาย ระบุ Assumption จบด้วยคำแนะนำที่ดำเนินการได้ทันที',m:'ผลิต Financial Analysis ตามรูปแบบที่ขอ รวม: Executive Summary, Key Assumptions, Model Structure/Narrative, Scenario Outputs, Sensitivity Analysis (3 Drivers หลัก), Risk Flags, คำแนะนำพร้อมเหตุผล',e:'ส่ง Board-level Financial Document Format: 1-page Executive Summary → Financial Detail → Scenario Analysis → Risk Quantification → Recommended Resolutions ระบุ Confidence Level และ Sensitivity Table สำหรับ 2 ตัวแปรหลัก'},
+    marketing:{g:'สร้างผลลัพธ์การตลาดที่ขอ ให้ Ad Copy จริง ตัวเลขจริง กลยุทธ์จริง ใช้ได้ทันที ไม่ใช่แค่ทฤษฎี',m:'ส่ง Marketing Deliverable ที่ครบถ้วน รวม: Campaign Strategy, Channel-by-channel Plan, Budget Allocation, Creative Direction, KPI Targets พร้อม Measurement, 90-day Execution Timeline พร้อม Brief Agency ได้เลย',e:'ผลิต Board-level GTM/Marketing Strategy Document โครงสร้าง: Market Opportunity → ICP & Buying Committee → Channel Architecture & Attribution → Budget & ROI Model → Risk Register → Strategic Recommendation & Board Approvals รวม Investor Narrative 250 คำ'},
+    sales:{g:'ส่ง Sales Tool ที่ขอ รวมสคริปต์คำต่อคำตรงที่เกี่ยวข้อง เน้นสิ่งที่ทำให้ลูกค้าเปลี่ยนจาก "คิดอยู่" เป็น "ตกลง"',m:'ส่ง Sales Management Document รวม: Situation Analysis, Recommended Strategy, Tactics & Scripts, Objection Handling, Coaching Guide, KPIs, 30/60/90-day Execution Plan พร้อม Deploy ทีมได้ทันที',e:'ผลิต Board-level Revenue Document รวม: Current State Analysis, Scenario Revenue Projections, Pipeline Coverage, GTM Capacity Assessment, Key Risks พร้อม Quantified Impact, Board Approvals ที่ต้องการ ส่ง One-page CRO Narrative สำหรับ Investor Update'},
+    hr:{g:'สร้าง HR Output ที่ขอ สมดุลระหว่างความยุติธรรมต่อพนักงานและการปกป้องบริษัท รวมคำพูดเฉพาะสำหรับเอกสารหรือการสนทนา ระบุความเสี่ยงทางกฎหมาย',m:'ส่ง People Management Document รวม: Situation Assessment, Recommended Approach พร้อมเหตุผล, Action Plan ทีละขั้น, Communication Scripts/Templates, Legal Risk Flags, Success Metrics พร้อม HRBP/Line Manager Execute ได้เลย',e:'ผลิต Board-level People Strategy Document รวม: Workforce Health Assessment, Strategic Gap Analysis, Investment Options พร้อม ROI Modelling, Risk Register, Recommended Resolutions, Implementation Roadmap ส่ง Investor-facing People Narrative ตามความเหมาะสม'},
+    ta:{g:'ส่ง Talent Acquisition Material ที่ขอ JD ต้องเน้นสิ่งที่ผู้สมัครจะได้รับ คำถามสัมภาษณ์ต้องอิง Behavior',m:'ผลิต Hiring Brief และเอกสารสนับสนุน JD ต้องน่าสนใจและ Optimise สำหรับช่องทาง Sourcing Interview Guide ต้องมีโครงสร้างพร้อม Evaluation Criteria ส่ง Sourcing Strategy พร้อม Search Strings/Outreach Templates',e:'ผลิต Board-level Talent Strategy Document รวม: Role Criticality Assessment, Market Context, Proposed Process & Timeline, Compensation Benchmark, Risk Analysis, Board Approvals ที่ต้องการ Format Search Mandate Brief สำหรับ Executive Search Firm'},
+    teacher:{g:'สร้างสื่อการสอนที่น่าสนใจและเหมาะกับวัยนักเรียน ครูคนอื่นหยิบไปใช้ได้เลยโดยไม่ต้องปรับมาก',m:"ผลิต Curriculum Design Deliverable ทั้งหมด ต้องสอดคล้องกับ Curriculum Standards และ Bloom's Taxonomy Differentiation สำหรับทุกกลุ่มต้องชัดเจน Assessment Tools ต้องมี Marking Guidance และ Mastery Threshold",e:'ผลิต Educational Strategy Board Document รวม: Performance Data Analysis, Evidence Review, Cost-benefit Analysis, Implementation Risk Assessment, Success Metrics & Evaluation Framework, Board Resolutions ที่ต้องการ'},
+    influencer:{g:'สร้าง Content ที่ฟังดูเหมือนคนจริงๆ ไม่ใช่แบรนด์ ตรงสไตล์แพลตฟอร์ม ถ้ามี Partnership สอดแทรกอย่างเป็นธรรมชาติ ต้องไม่รู้สึกว่าเป็นโฆษณา',m:'ส่ง Content Production Package ทั้งหมด Copy ต้องเป็น Platform-native ตรง Brand Voice Optimise สำหรับ Success Metrics ถ้ามี Sponsored Content ต้องผ่าน Compliance ส่ง Performance Prediction พร้อมเหตุผล',e:'ผลิต Creator Business Strategy Document รวม: Revenue Model Analysis, Brand Positioning Strategy, Monetisation Diversification Plan, Risk Assessment, Strategic Options พร้อม Financial Projections, คำแนะนำพร้อม Implementation Roadmap'}
+  }
+};
+
+// ── APP STATE ──────────────────────────────────────────────────────────────
+var APP={lang:'en',level:'g',car:'content',fields:{},tab:'i'};
+
+function u(id){return document.getElementById(id);}
+function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function ui(){return UI[APP.lang];}
+function cm(){return CMETA[APP.lang][APP.car];}
+
+function applyUI(){
+  var d=ui();
+  u('tli').textContent=d.inp; u('tlp').textContent=d.prev;
+  u('slc').textContent=d.chars; u('sls').textContent=d.secs;
+  u('cpl').textContent=d.copy; u('pet').textContent=d.fill;
+  u('lg').textContent=d.lG; u('lm').textContent=d.lM; u('le').textContent=d.lE;
+  u('lgd').textContent=d.lgd; u('lmd').textContent=d.lmd; u('led').textContent=d.led;
+  updateHint();
+}
+
+function updateHint(){
+  var d=ui(), hmap={g:d.hG,m:d.hM,e:d.hE}, cmap={g:'gh',m:'mh',e:'eh'};
+  var box=u('hbox'); box.textContent=hmap[APP.level]; box.className='hint-box '+cmap[APP.level];
+}
+
+function rebuildCar(){
+  var meta=CMETA[APP.lang];
+  u('csel').innerHTML=CARS.map(function(k){
+    return '<option value="'+k+'"'+(APP.car===k?' selected':'')+'>'+EMO[k]+' '+meta[k].n+'</option>';
+  }).join('');
+}
+
+function renderBadge(){
+  var m=cm();
+  u('cbadge').innerHTML='<span class="badge" style="background:'+BGC[APP.car]+';color:'+COL[APP.car]+'">'+EMO[APP.car]+' '+m.n+' — '+m.d+'</span>';
+}
+
+function getSecs(){
+  var fd=FD[APP.lang][APP.car];
+  if(!fd) return [];
+  return fd[APP.level]||[];
+}
+
+function renderFields(){
+  var secs=getSecs(), fc=u('fc');
+  fc.innerHTML=''; APP.fields={};
+  secs.forEach(function(sec){
+    var div=document.createElement('div');
+    div.className='sdiv';
+    div.innerHTML='<span class="sbadge" style="background:'+BGC[APP.car]+';color:'+COL[APP.car]+'">'+sec.s+'</span>';
+    fc.appendChild(div);
+    sec.fields.forEach(function(f){
+      APP.fields[f.id]='';
+      var card=document.createElement('div');
+      card.className='card';
+      var tip=f.tip?'<div class="tip">💡 '+f.tip+'</div>':'';
+      var inp='';
+      if(f.opts){
+        inp='<div class="chips" id="ch_'+f.id+'">'+f.opts.map(function(o){return '<button class="chip" onclick="tog(this,\''+f.id+'\')">'+o+'</button>';}).join('')+'</div>';
+      }else if(f.rows){
+        inp='<textarea id="fi_'+f.id+'" class="inp" rows="'+f.rows+'" placeholder="'+(f.ph||'').replace(/"/g,'&quot;')+'"></textarea>';
+      }else{
+        inp='<input id="fi_'+f.id+'" class="inp" type="text" placeholder="'+(f.ph||'').replace(/"/g,'&quot;')+'" autocomplete="off">';
+      }
+      card.innerHTML='<div class="ch"><div class="ci" style="background:'+BGC[APP.car]+'">'+EMO[APP.car]+'</div><span class="cl">'+f.l+'</span></div>'+tip+inp;
+      fc.appendChild(card);
+      if(!f.opts){
+        (function(fid){
+          var el=document.getElementById('fi_'+fid);
+          if(el) el.addEventListener('input',function(){APP.fields[fid]=el.value;upPrev();});
+        })(f.id);
+      }
+    });
+  });
+}
+
+function tog(el,id){
+  var chips=document.querySelectorAll('#ch_'+id+' .chip');
+  for(var i=0;i<chips.length;i++) chips[i].classList.remove('on');
+  APP.fields[id]=(APP.fields[id]===el.textContent)?'':el.textContent;
+  if(APP.fields[id]) el.classList.add('on');
+  upPrev();
+}
+
+function buildBlocks(){
+  var secs=getSecs(),B=[];
+  secs.forEach(function(sec){
+    sec.fields.forEach(function(f){
+      var v=(APP.fields[f.id]||'').trim(); if(!v) return;
+      var lines=v.split('\n').filter(function(l){return l.trim();});
+      if(lines.length>1) B.push({lbl:f.l,steps:lines});
+      else B.push({lbl:f.l,body:esc(v)});
+    });
+  });
+  return B;
+}
+
+function lvlLabel(){
+  var d=ui(); return {g:d.lG,m:d.lM,e:d.lE}[APP.level];
+}
+
+function upPrev(){
+  var B=buildBlocks(),pe=u('pe'),pc=u('pc');
+  if(!B.length){
+    pe.style.display='flex'; pc.style.display='none';
+    ['sc','st','ss'].forEach(function(id){u(id).textContent='0';});
+    return;
+  }
+  pe.style.display='none'; pc.style.display='block';
+  var closing=CL[APP.lang][APP.car][APP.level], fl=ui().fin;
+  pc.innerHTML=B.map(function(b,i){
+    var cls=BCLS[i%BCLS.length];
+    var body=b.steps
+      ?b.steps.map(function(s,j){return '<div class="pstep"><span class="sn">'+(j+1)+'</span><span>'+esc(s)+'</span></div>';}).join('')
+      :'<div class="pbody">'+b.body+'</div>';
+    return '<div class="psec"><div class="plbl '+cls+'">'+b.lbl+'</div>'+body+'</div>';
+  }).join('')+'<hr class="pdiv"><div class="pclo"><span class="plbl cz" style="display:inline-flex;margin-bottom:4px">'+fl+'</span><br>'+closing+'</div><span class="cur"></span>';
+  var plain=buildPlain(B,closing);
+  u('sc').textContent=plain.length;
+  u('st').textContent=Math.ceil(plain.length/3.5);
+  u('ss').textContent=B.length;
+}
+
+function buildPlain(B,closing){
+  var m=cm();
+  var lines=[EMO[APP.car]+' '+m.n+' ['+lvlLabel()+']',''];
+  B.forEach(function(b){
+    if(b.steps){lines.push('['+b.lbl+']');b.steps.forEach(function(s,i){lines.push('  '+(i+1)+'. '+s);});}
+    else lines.push('['+b.lbl+'] '+b.body.replace(/<[^>]+>/g,''));
+  });
+  lines.push('',closing);
+  return lines.join('\n');
+}
+
+function setLevel(lv){
+  APP.level=lv;
+  var lvls=['g','m','e'],cls=['ag','am','ae'],ids=['bg','bm','be'];
+  for(var i=0;i<lvls.length;i++){
+    u(ids[i]).className='lvl-btn'+(lvls[i]===lv?' '+cls[i]:'');
+  }
+  updateHint(); renderFields(); upPrev();
+}
+
+function setCar(k){APP.car=k; APP.fields={}; renderBadge(); renderFields(); upPrev();}
+
+function changeLang(lv){
+  APP.lang=lv;
+  applyUI();
+  rebuildCar();
+  renderBadge();
+  renderFields();
+  upPrev();
+}
+
+function switchTab(t){
+  APP.tab=t;
+  u('pi').className='pane'+(t==='i'?'':' off');
+  u('pp').className='pane'+(t==='p'?'':' off');
+  u('ti').className='tab'+(t==='i'?' on':'');
+  u('tp').className='tab'+(t==='p'?' on':'');
+  if(t==='p') upPrev();
+}
+
+function copyPrompt(){
+  var B=buildBlocks();
+  if(!B.length){toast(ui().fill);return;}
+  var txt=buildPlain(B,CL[APP.lang][APP.car][APP.level]);
+  navigator.clipboard.writeText(txt).then(function(){
+    toast(ui().copied);
+    var l=u('cpl'),b=u('cpbtn');
+    l.textContent=ui().copied; b.style.background='linear-gradient(135deg,#10b981,#059669)';
+    setTimeout(function(){l.textContent=ui().copy; b.style.background='';},2000);
+  }).catch(function(){
+    var a=document.createElement('textarea'); a.value=txt;
+    document.body.appendChild(a); a.select(); document.execCommand('copy'); document.body.removeChild(a);
+    toast(ui().copied);
+  });
+}
+
+function clearAll(){APP.fields={}; renderFields(); upPrev();}
+
+function toast(msg){
+  var t=u('toast'); t.textContent=msg; t.classList.add('on');
+  setTimeout(function(){t.classList.remove('on');},2000);
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+applyUI(); setLevel('g'); rebuildCar(); renderBadge(); renderFields();
+</script>
+</body>
+</html>
