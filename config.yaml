@@ -1,0 +1,19 @@
+input:
+  file_path: "companies.csv"
+
+output:
+  file_path: "financial_report.xlsx"
+  database: "financial_data.db"
+  log_file: "app.log"
+
+scraper:
+  headless: true
+  timeout: 30000          # milliseconds
+  retry_attempts: 3
+  retry_delay: 2          # base seconds for exponential backoff
+  batch_size: 10
+  base_url: "https://www.dbd.go.th"
+  search_url: "https://www.dbd.go.th/main.php?filename=chkdata_niti"
+
+processing:
+  resume_from_last: true  # skip companies already in DB
