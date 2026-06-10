@@ -11,7 +11,9 @@ Navigation flow
 """
 
 import asyncio
+import glob as _glob
 import logging
+import os
 import re
 from typing import Optional
 
@@ -22,6 +24,30 @@ from playwright.async_api import (
     Page,
     TimeoutError as PWTimeout,
 )
+
+
+def _find_chromium() -> Optional[str]:
+    """Locate the Chromium binary installed by `playwright install chromium`."""
+    candidates = [
+        # Linux – playwright default cache
+        os.path.expanduser("~/.cache/ms-playwright/chromium-*/chrome-linux/chrome"),
+        # Linux – system-wide (e.g. Docker image)
+        "/opt/pw-browsers/chromium-*/chrome-linux/chrome",
+        # macOS
+        os.path.expanduser(
+            "~/Library/Caches/ms-playwright/chromium-*/chrome-mac/Chromium.app"
+            "/Contents/MacOS/Chromium"
+        ),
+        # Windows
+        os.path.expanduser(
+            r"~\AppData\Local\ms-playwright\chromium-*\chrome-win\chrome.exe"
+        ),
+    ]
+    for pattern in candidates:
+        matches = sorted(_glob.glob(pattern))
+        if matches:
+            return matches[-1]   # newest build
+    return None
 
 logger = logging.getLogger(__name__)
 
@@ -86,17 +112,26 @@ class DBDScraper:
 
     async def start(self):
         self._playwright = await async_playwright().start()
-        self._browser = await self._playwright.chromium.launch(
+
+        launch_kwargs: dict = dict(
             headless=self.headless,
             args=[
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
                 "--disable-dev-shm-usage",
+                "--ignore-certificate-errors",   # Thai govt sites use self-signed certs
             ],
         )
+        exe = _find_chromium()
+        if exe:
+            launch_kwargs["executable_path"] = exe
+            logger.debug("Using Chromium: %s", exe)
+
+        self._browser = await self._playwright.chromium.launch(**launch_kwargs)
         self._context = await self._browser.new_context(
             locale="th-TH",
             timezone_id="Asia/Bangkok",
+            ignore_https_errors=True,            # accept self-signed SSL certs
             user_agent=(
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                 "AppleWebKit/537.36 (KHTML, like Gecko) "
